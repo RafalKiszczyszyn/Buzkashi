@@ -1,0 +1,1 @@
+Miejsce na globalnie dostępne pliki statyczne
