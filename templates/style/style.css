@@ -41,7 +41,7 @@ body {
     padding: 20px 0 0 10px;
     left: 0;
     transition: 0.5s;
-    transition-property: left;
+    transition-property: width;
 }
 
 .sidebar a {
@@ -80,6 +80,8 @@ body {
 .sidebar span {
     position: absolute;
     left: 80px;
+    opacity: 1;
+    transition: 0.3s;
 }
 
 .indicator {
@@ -116,7 +118,7 @@ label #btn-sidebar:hover {
 }
 
 #check:checked ~ .sidebar a span{
-    display: none;
+    opacity: 0;
 }
 
 /* #check{
