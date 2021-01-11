@@ -1,16 +1,28 @@
+html {
+    background-color: #f5f5f5;
+    background-size: cover;
+}
+
 body {
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f5f5f5;
 }
 
-.topbar {
+main {
     position: relative;
+    display: block;
+    padding: 150px 50px 0 130px;
+    }
+
+.topbar {
+    position: fixed;
+    z-index: 1;
     background: white;
     padding: 20px;
     width: 100%;
     height: 60px;
+    box-shadow: 1px 1px 10px #eeeeee;
 }
 
 .topbar-logo {
@@ -29,19 +41,29 @@ body {
 
 .topbar-buttons {
     position: absolute;
-    right: 40px;
+    right: 60px;
     top: 25px;
 }
 
-
+.topbar-profile img{
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 60px;
+    right: 90px;
+    top: 20px;
+}
 
 .sidebar {
-    background: #ffffff;
+    z-index: 1;
+    background: white;
     position: fixed;
     height: 100%;
     width: 70px;
-    padding: 20px 0 0 10px;
+    padding: 0 0 0 10px;
+    top: 100px;
     left: 0;
+    box-shadow: 5px 5px 10px #eeeeee;
     transition: 0.5s;
     transition-property: width;
 }
@@ -83,7 +105,6 @@ body {
     position: absolute;
     left: 80px;
     opacity: 0;
-    transition: 0.3s;
 }
 
 .indicator {
@@ -91,7 +112,7 @@ body {
 }
 
 .icon-settings {
-    margin-top: 320px;
+    margin-top: 310px;
     position: absolute;
 }
 
@@ -116,13 +137,80 @@ label #btn-sidebar:hover {
 }
 
 #check:checked ~ .sidebar {
+    width: 210px;
+}
+
+#check:checked ~ .sidebar a span {
+    opacity: 1;
+    transition: 0.3s;
+}
+
+
+.tile {
+    background-color: white;
+    display: block;
+    border-radius: 15px;
+    padding: 20px 20px 20px 20px;
+    margin-bottom: 20px;
+    box-shadow: 3px 3px 3px #dddddd;
+}
+
+.tile-grid {
+    display: grid;
+    grid-template-columns: auto 250px;
+    grid-gap: 25px;
+    background-color: white;
+}
+
+.tile-content {
+    grid-column-start: 1;
+    grid-column-end: 2;
+}
+
+.tile-buttons {
+    grid-column-start: 2;
+    grid-column-end: 3;
+    display: block;
     width: 250px;
 }
 
-#check:checked ~ .sidebar a span{
-    opacity: 1;
+.tile-buttons a {
+    display: block;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: solid #bbbbbb 1px;
+    color: black;
+    font-size: medium;
+    font-weight: lighter;
+    text-decoration: none;
 }
 
+.tile-content h3 {
+    font-size: x-large;
+    font-weight: 400;
+    margin: 0;
+}
+
+.tile-content h6 {
+    font-size: medium;
+    font-weight: lighter;
+    margin: 10px 0 10px 0;
+}
+
+.tile-content h5 {
+    display: inline;
+    float: right;
+    font-size: medium;
+    font-weight: 600;
+    margin: 10px 0 10px 0;
+}
+
+.tile-content article {
+    display: block;
+    font-size: small;
+    font-weight: 300;
+    text-align: justify;
+}
 
 .button-primary {
     background-color: #AF1C06;
@@ -134,14 +222,12 @@ label #btn-sidebar:hover {
     font-size: 15px;
     margin: 10px;
     cursor: pointer;
-    box-shadow: 2px 2px 8px #888888;
+    box-shadow: 1px 1px 5px #dddddd;
     text-decoration: none;
 }
 
-​.button-primary:hover {
+.button-primary:hover {
     background-color: #96200E;
-    text-decoration: none;
-    color: white;
 }
 
 .button-secondary {
@@ -157,8 +243,6 @@ label #btn-sidebar:hover {
     text-decoration: none;
 }
 
-​.button-secondary:hover {
-    text-decoration: none;
-    color: black;
-    box-shadow: 2px 2px 8px #888888;
+.button-secondary:hover {
+    box-shadow: 1px 1px 5px #dddddd;
 }
