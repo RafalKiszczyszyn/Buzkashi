@@ -10,10 +10,8 @@ body {
 }
 
 main {
-    position: relative;
-    display: block;
-    padding: 150px 50px 0 130px;
-    }
+    padding: 130px 50px 0 130px;
+}
 
 .topbar {
     position: fixed;
@@ -30,13 +28,13 @@ main {
 }
 
 .topbar h3 {
-    color: black;
-    font-size: 35px;
-    font-weight: 100; 
-    margin: 0;
     position: absolute;
     left: 150px;
     top: 25px;
+    margin: 0;
+    color: black;
+    font-size: 35px;
+    font-weight: 100; 
 }
 
 .topbar-buttons {
@@ -55,14 +53,14 @@ main {
 }
 
 .sidebar {
-    z-index: 1;
-    background: white;
     position: fixed;
+    z-index: 1;
     height: 100%;
     width: 70px;
     padding: 0 0 0 10px;
     top: 100px;
     left: 0;
+    background: white;
     box-shadow: 5px 5px 10px #eeeeee;
     transition: 0.5s;
     transition-property: width;
@@ -70,35 +68,30 @@ main {
 
 .sidebar a {
     position: relative;
-    color: black;
     display: block;
     width: 100%;
     line-height: 50px;
     padding-left: 20px;
+    color: black;
     text-decoration: none;
-    box-sizing: border-box;
 }
 
 .sidebar a:hover .indicator {
-    display: block;
     position: absolute;
-    background-color: black;
     display: block;
     width: 10px;
     height: 50px;
     left: -10px;
-    box-sizing: border-box;
+    background-color: black;
 }
 
 .indicator-active {
-    display: block;
     position: absolute;
-    background-color: black;
     display: block;
     width: 10px;
     height: 50px;
     left: -10px;
-    box-sizing: border-box;
+    background-color: black;
 }
 
 .sidebar span {
@@ -112,17 +105,17 @@ main {
 }
 
 .icon-settings {
-    margin-top: 310px;
     position: absolute;
+    margin-top: 310px;
 }
 
 label #btn-sidebar {
-    z-index: 1;
     color: black;
     position: fixed;
-    cursor: pointer;
     left: 110px;
     top: 42px;
+    z-index: 1;
+    cursor: pointer;
     font-size: 20px;
     transition: 0.5s;
     transition-property: color;
@@ -146,103 +139,8 @@ label #btn-sidebar:hover {
 }
 
 
-.tile {
-    background-color: white;
-    display: block;
-    border-radius: 15px;
-    padding: 20px 20px 20px 20px;
-    margin-bottom: 20px;
-    box-shadow: 3px 3px 3px #dddddd;
-}
-
-.tile-grid {
-    display: grid;
-    grid-template-columns: auto 250px;
-    grid-gap: 25px;
-    background-color: white;
-}
-
-.tile-content {
-    grid-column-start: 1;
-    grid-column-end: 2;
-}
-
-.tile-buttons {
-    grid-column-start: 2;
-    grid-column-end: 3;
-    display: block;
-    width: 250px;
-}
-
-.tile-buttons a {
-    display: block;
-    margin-bottom: 10px;
-    padding-bottom: 5px;
-    border-bottom: solid #bbbbbb 1px;
-    color: black;
-    font-size: medium;
-    font-weight: lighter;
-    text-decoration: none;
-}
-
-.tile-content h3 {
-    font-size: x-large;
+main .title {
+    padding: 0 0 30px 20px;
+    font-size: xx-large;
     font-weight: 400;
-    margin: 0;
-}
-
-.tile-content h6 {
-    font-size: medium;
-    font-weight: lighter;
-    margin: 10px 0 10px 0;
-}
-
-.tile-content h5 {
-    display: inline;
-    float: right;
-    font-size: medium;
-    font-weight: 600;
-    margin: 10px 0 10px 0;
-}
-
-.tile-content article {
-    display: block;
-    font-size: small;
-    font-weight: 300;
-    text-align: justify;
-}
-
-.button-primary {
-    background-color: #AF1C06;
-    border: hidden;
-    color: white;
-    padding: 5px 15px;
-    text-align: center;
-    display: inline-block;
-    font-size: 15px;
-    margin: 10px;
-    cursor: pointer;
-    box-shadow: 1px 1px 5px #dddddd;
-    text-decoration: none;
-}
-
-.button-primary:hover {
-    background-color: #96200E;
-}
-
-.button-secondary {
-    background-color: transparent;
-    border: hidden;
-    color: black;
-    padding: 5px 15px;
-    text-align: center;
-    display: inline-block;
-    font-size: 15px;
-    margin: 10px;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.button-secondary:hover {
-    box-shadow: 1px 1px 5px #dddddd;
 }

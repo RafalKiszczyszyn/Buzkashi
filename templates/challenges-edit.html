@@ -8,10 +8,11 @@
     <link rel="stylesheet" href="./style/style.css" />
     <link rel="stylesheet" href="./style/buttons.css" />
     <link rel="stylesheet" href="./style/tile.css" />
+    <link rel="stylesheet" href="./style/tile-h.css" />
     <meta name="description" content="Buzkashi - Zawody w programowaniu zespołowym" />
     <meta name="keywords" content="zawody, pwr, programowanie, informatyka" />
     <link rel="icon" type="image/png" href="./img/favicon.png" />
-    <title>Buzkashi</title>
+    <title>Buzkashi - edycja zadania</title>
 </head>
 
 <body>
@@ -23,10 +24,9 @@
                         height="60px" width="60px"></a>
             </div>
             <h3>Buzkashi</h3>
-
-            <div class="topbar-buttons">
-                <a href="#" class="button-primary">Zaloguj sie</a>
-                <a href="#" class="button-secondary">Zarejestruj sie</a>
+            <div class="topbar-profile">
+                <img src="https://cdn.business2community.com/wp-content/uploads/2017/08/blank-profile-picture-973460_640.png"
+                    alt="Logo"></a>
             </div>
         </nav>
 
@@ -35,8 +35,8 @@
             <i class="fas fa-bars" id="btn-sidebar"></i>
         </label>
         <nav class="sidebar">
-            <a href="#">
-                <div class="indicator-active"></div>
+            <a href="./index.html">
+                <div class="indicator"></div>
                 <i class="fas fa-home fa-lg"></i><span>Home</span>
             </a>
             <a href="./comps.html">
@@ -48,7 +48,7 @@
                 <i class="fas fa-list-ol fa-lg"></i><span>Ranking</span>
             </a>
             <a href="./challenges.html">
-                <div class="indicator"></div>
+                <div class="indicator-active"></div>
                 <i class="far fa-edit fa-lg"></i><span>Zadania</span>
             </a>
             <a href="./solutions.html">
@@ -67,6 +67,28 @@
     </header>
     <main>
 
+        <div class="title">Zadania</div>
+
+        <div class="tile">
+            <form>
+                <div class="tile-grid">
+                    <div class="tile-content">
+                        <input type="text" id="challenge-title" placeholder="Tytuł zadania" class="input-title">
+                        <h5>Sesja dla studentów</h5>
+                        <h6>Zawody dla studentów lato 2021</h6>
+                    </div>
+                    <div class="tile-content-2">
+                        <textarea id="challenge-text" placeholder="Wprowadź treść zadania"
+                            class="input-text"></textarea>
+                    </div>
+
+                    <div class="tile-buttons">
+                        <a href="./edit.html"><span>Anuluj</span></a>
+                        <a href="./tests.html"><span>Zapisz zmiany</span></a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </main>
 </body>
 
