@@ -1,0 +1,41 @@
+.ranks {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tile {
+    width: 45%;
+}
+
+.tile h3 {
+    margin: 0 0 10px 0;
+    font-size: x-large;
+    font-weight: 400;
+}
+
+.time {
+    display: inline;
+    float: right;
+    margin: 20px 20px 0 0;
+    font-size: medium;
+    font-weight: lighter;
+}
+
+.tile-grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    grid-gap: 0;
+}
+
+.tile-grid h5 {
+    margin: 5px 0 5px 0;
+}
+
+p {
+    display: block;
+    margin: 5px 0 5px 0;
+    padding-bottom: 5px;
+    border-bottom: solid #bbbbbb 0.5px;
+    font-size: small;
+    font-weight: lighter;
+}
