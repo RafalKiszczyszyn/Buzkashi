@@ -9,5 +9,9 @@ def challenges_view(request, *args, **kwargs):
     return render(request, "challenges.html", {})
 
 
+def challenges_edit_view(request, *args, **kwargs):
+    return render(request, "challenges-edit.html", {})
+
+
 def rank_view(request, *args, **kwargs):
     return render(request, "rank.html", {})
