@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+
+    .tile h3 {
+        margin: 0 0 10px 0;
+        font-size: x-large;
+        font-weight: 400;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="title">Rozwiązania</div>
+
+<div class="tile">
+    <h3>Nazwa zawodów</h3>
+    <table class="table table-fixed">
+        <thead>
+            <tr>
+                <th style="width: 10%">Lp.</th>
+                <th>Zespół</th>
+                <th>Czas rozwiązania</th>
+                <th style="width: 10%"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1.</td>
+                <td>Czarni rycerze</td>
+                <td>46 min</td>
+                <td><a class="light-link" href="{% url 'solutions_results' solution_id=1 %}">Szczegóły</a></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

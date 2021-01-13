@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+<style>
+
+    .tile h3 {
+        margin: 0 0 10px 0;
+        font-size: x-large;
+        font-weight: 400;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<div style="float: right">
+    <a href="{% url 'solutions_results' solution_id=1 %}" class="button-secondary button-secondary-active-black">Wyniki testów</a>
+    <a href="{% url 'solutions_code' solution_id=1 %}" class="button-secondary">Kod źródłowy</a>
+</div>
+
+<div class="title">
+    <a class="light-link" href="{% url 'solutions' %}"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
+    Rozwiązanie zespołu Czarni rycerze
+</div>
+
+<div class="tile">
+
+    <h3>Wyniki testów automatycznych</h3>
+
+    <div class="tile-grid">
+
+        <div class="tile-grid-span">
+
+            <table class="table" style="col">
+                <thead>
+                    <tr>
+                        <th>Lp.</th>
+                        <th>Test</th>
+                        <th>Oczekiwane wyjście</th>
+                        <th>Wyjście rozwiązania</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1.</td>
+                        <td>Test pierwszy</td>
+                        <td><pre><samp>Hello World!</samp></pre></td>
+                        <td><pre><samp>Hello World!</samp></pre></td>
+                    </tr>
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="tile-buttons">
+            <a href="#"><span>Zaakceptuj</span></a>
+            <a href="#"><span>Odrzuć</span></a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

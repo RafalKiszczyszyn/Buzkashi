@@ -30,8 +30,16 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/windows
 
 **/__pycache__
-
-*.sqlite3
 **/migrations
 
+### macOS ###
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
 
+.idea/
+bin/
+lib/
+db.sqlite3
+pyvenv.cfg
