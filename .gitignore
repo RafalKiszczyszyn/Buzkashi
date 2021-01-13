@@ -39,3 +39,7 @@ $RECYCLE.BIN/
 
 .idea/
 .gitignore
+bin/
+lib/
+db.sqlite3
+pyvenv.cfg
