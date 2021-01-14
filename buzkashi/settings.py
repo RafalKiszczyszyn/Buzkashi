@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'temp',
+    'buzkashi_app.apps.BuzkashiAppConfig'
 ]
 
 MIDDLEWARE = [
