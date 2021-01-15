@@ -31,21 +31,17 @@ class Competition(models.Model):
     # data rozpoczęcia: TIMESTAMP, NOT NULL, DEFAULT=NOW
     start_date = models.DateTimeField(default=timezone.now)
 
-    # data zakończenia: TIMESTAMP, NOT NULL, DEFAULT=NOW
-    end_date = models.DateTimeField(default=timezone.now)
+    # czas trwania: ???, NOT NULL
+    duration = models.DurationField(help_text='HH:MM:ss format')
 
-    # czas trwania: FLOAT, NOT NULL
-    duration = models.FloatField()
-    #TODO: django ma typ DurationField
-
-    # maksymalna liczba zespołów: INTEGER, NOT NULL
-    max_teams = models.IntegerField(verbose_name='Max Number Of Teams')
+    # maksymalna liczba zespołów: INTEGER, NOT NULL, DEFAULT=50
+    max_teams = models.IntegerField(verbose_name='Max Number Of Teams', default=50)
 
     # czy zawody testowe: BIT, NOT NULL
     is_test = models.BooleanField()
 
-    # opis: VARCHAR(255) TODO: chyba opis powinien być dłuższy
-    description = models.CharField(max_length=255, blank=True, null=True)
+    # opis: VARCHAR(2000)
+    description = models.CharField(max_length=2000, blank=True, null=True)
 
     # TODO: tutaj powinny być klucze obce do rankingu, ale nie wiadomo czy będzię on przechowywany w bazie
 
@@ -59,15 +55,15 @@ class EduInstitution(models.Model):
     # nazwa: VARCHAR(50), NOT NULL, UNIQUE
     name = models.CharField(max_length=50, unique=True)
 
-    # wojewodztwo: VARCHAR(50), NOT NULL, UNIQUE
-    region = models.CharField(max_length=50, unique=True)
-    # TODO: enumerator? chyba nie
+    # wojewodztwo: VARCHAR(50), NOT NULL
+    region = models.CharField(max_length=50)
+    # TODO: enumerator?
 
     # email: VARCHAR(50), NOT NULL, UNIQUE
-    email = models.CharField(max_length=50, unique=True)
+    email = models.EmailField(unique=True)
 
-    # kod autoryzacji: VARCHAR(50), NOT NULL
-    authorization_code = models.CharField(max_length=50)
+    # kod autoryzacji: VARCHAR(50)
+    authorization_code = models.CharField(max_length=50, null=True, blank=True)
 
     # czy wyższa: BIT, NOT NULL
     is_university = models.BooleanField(default=True)
@@ -83,16 +79,14 @@ class Team(models.Model):
     # nazwa: VARCHAR(50), NOT NULL, UNIQUE
     name = models.CharField(max_length=50, unique=True)
 
-    # ocena: INTEGER, NOT NULL
-    score = models.IntegerField(default=0)
-    # TODO: ocena to suma czasu rozwiązywania zadań,
-    #      więc chyba też mogłóby być to pole typu Duration
+    # ocena: ???, NOT NULL, DEFAULT=0
+    score = models.DurationField(default=0)
 
     # data zgłoszenia: TIMESTAMP, NOT NULL, DEFAULT=NOW
-    application_date = models.DateTimeField(default=timezone.now())
+    application_date = models.DateTimeField(default=timezone.now)
 
-    # priorytet: INTEGER, NOT NULL DEFAULT=1
-    priority = models.IntegerField(default=1)
+    # priorytet: FLOAT, NOT NULL, DEFAULT=0
+    priority = models.FloatField(default=0)
 
     # czy zakwalifikowany: BIT, NOT NULL
     is_qualified = models.BooleanField(default=False)
@@ -113,7 +107,6 @@ class Team(models.Model):
     institution = models.ForeignKey(EduInstitution, on_delete=models.PROTECT)
 
     # TODO: tutaj powinien być klucz obcy do rankingu, ale nie wiadomo czy będzię on przechowywany w bazie
-    # TODO: czy w zespole jest potrzebny ranking? Zespół mógłby odczytywać ranking przez Zawody
 
 
 class Participant(models.Model):
@@ -127,11 +120,13 @@ class Participant(models.Model):
 
     # nazwisko: VARCHAR(50), NOT NULL
     surname = models.CharField(max_length=50)
-    # TODO: czy potrzebne są imiona, nazwiska i emaile
-    #       jak uzytkownik auth je ma?
+
+    # email: ???, NOT NULL
+    email = models.EmailField()
 
     # czy kapitan: BIT, NOT NULL
     is_capitan = models.BooleanField(default=False)
+    # TODO: ograniczenie w zespole: tylko jeden uczestnik moze byc kapitanem
 
     # zespół: FOREIGN KEY(Team)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -144,14 +139,8 @@ class Judge(models.Model):
     z modelem sędziego powiązane jest konto użytkownika
     """
 
-    # imię: VARCHAR(50), NOT NULL
-    name = models.CharField(max_length=50)
-
-    # nazwisko: VARCHAR(50), NOT NULL
-    surname = models.CharField(max_length=50)
-
     # czy główny: BIT, NOT NULL
-    is_chief = models.BooleanField()
+    is_chief = models.BooleanField(default=False)
 
     # powiązane konto
     associated_user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -163,13 +152,11 @@ class Task(models.Model):
     id generowane automatycznie
     """
 
-    # tytuł: VARCHAR(255), NOT NULL
+    # tytuł: VARCHAR(255), NOT NULL, UNIQUE
     title = models.CharField(max_length=255)
 
-    # treść: VARCHAR(500), NOT NULL
-    body = models.CharField(max_length=500)
-    # TODO: chyba wystarczy pole z treścią, nie potrzeba dodatkowo opisu?
-    #       i też powinno być dłuższe
+    # treść: VARCHAR(2000), NOT NULL
+    body = models.CharField(max_length=2000)
 
     # opis: VARCHAR(255)
     description = models.CharField(max_length=255, blank=True, null=True)
@@ -186,7 +173,21 @@ class AutomatedTest(models.Model):
     Klasa ORM testu automatycznego
     id generowane automatycznie
     """
-    pass
+
+    # tytuł: VARCHAR(255), NOT NULL
+    title = models.CharField(max_length=255)
+
+    # dane wejsciowe: FILE ?, NOT NULL TODO: jaka ścieżka zapisu?
+    input = models.FileField(upload_to='uploads/tests')
+
+    # oczekiwane dane wyjsciowe: FILE ?, NOT NULL
+    expected_output = models.FileField(upload_to='uploads/tests')
+
+    # max czas wykonywania: ???, NOT NULL, TODO: DEFAULT?
+    max_time = models.DurationField()
+
+    # zadanie: FOREIGN KEY(Task)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
 
 
 class AutomatedTestResult(models.Model):
@@ -194,7 +195,34 @@ class AutomatedTestResult(models.Model):
     Klasa ORM wyniku testu automatycznego
     id generowane automatycznie
     """
-    pass
+
+    class TestStatus(models.IntegerChoices):
+        """
+        Enumerator dla statusu wyniku testu
+        """
+        # zaakceptowane
+        PASSED = 0
+
+        # przekroczony czas wykonywania
+        TIME_EXCEEDED_ERROR = 1
+
+        # błąd kompilacji
+        COMPILATION_ERROR = 2
+
+        # błąd wykonywania
+        RUNTIME_ERROR = 3
+
+        # niezaakceptowane
+        FAILED = 4
+
+    # dane wyjściowe: FILE ?, NOT NULL
+    output = models.FileField(upload_to='uploads/test_results')
+
+    # status: INTEGER, NOT NULL, DEFAULT=4
+    status = models.TextField(choices=TestStatus.choices, default=TestStatus.FAILED)
+
+    # czas wykonywania: ???, NOT NULL
+    runtime = models.DurationField()
 
 
 class Solution(models.Model):
@@ -230,18 +258,63 @@ class Solution(models.Model):
         # rozwiązanie odrzucone
         REJECTED = 'Odrzucone'
 
-    # author = models.ForeignKey(Team)
-    #
-    # task = models.ForeignKey(Task)
-    #
-    # version = models.IntegerField(default=1)
-    #
-    # time = models.FloatField()
-    #
-    # score = models.DurationField()
-    # TODO: czy potrzebujemy osobnych pól na czas i ocenę?
-
     # kod źródłowy: FILE SAVED IN DIRECTORY NOT DATABASE!
-    source_code = models.FileField()
+    source_code = models.FileField(upload_to='uploads/solutions')
+
+    # język programowania: ???, NOT NULL, DEFAULT='JAVA'
+    programming_language = models.TextField(choices=SolutionStatus.choices, default=SolutionStatus.PENDING)
+
+    # autor: FOREIGN KEY(Team)
+    author = models.ForeignKey(Team, on_delete=models.CASCADE)
+
+    # zadanie: FOREIGN KEY(Task)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+
+    # status: ???, NOT NULL, DEFAULT=4
+    status = models.TextField(choices=SolutionStatus.choices, default=SolutionStatus.PENDING)
+
+    # wersja: INTEGER. NOT NULL, DEFAULT=1
+    version = models.IntegerField(default=1)
+
+    # czas złożenia: TIMESTAMP, NOT NULL, DEFAULT=NOW
+    submission_time = models.DateTimeField(default=timezone.now)
+
+    # TODO: ocena wyliczana po zaakceptowaniu, uwzględnia czas złożenia i wersję
 
 
+class Notice(models.Model):
+    """
+    Klasa ORM uwaga
+    id generowane automatycznie
+    """
+
+    # tytuł: VARCHAR(50), NOT NULL
+    title = models.CharField(max_length=50)
+
+    # treść: ???(500), NOT NULL
+    body = models.TextField(max_length=500)
+
+    # data opublikowania: TIMESTAMP, NOT NULL, DEFAULT=NOW
+    publication_date = models.DateTimeField(default=timezone.now)
+
+    # zadanie: FOREIGN KEY(Task)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+
+    # zespół: FOREIGN KEY(Team)
+    team = models.ForeignKey(Team, on_delete=models.PROTECT)
+
+
+class Explanation(models.Model):
+    """
+    Klasa ORM wyjaśnienie
+    id generowane automatycznie
+    """
+
+    # treść: ???, NOT NULL
+    body = models.TextField()
+
+    # data opublikowania: TIMESTAMP, NOT NULL, DEFAULT=NOW
+    publication_date = models.DateTimeField(default=timezone.now)
+
+    # sędzia: FOREIGN KEY(Judge)
+    judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
