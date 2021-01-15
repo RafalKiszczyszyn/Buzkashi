@@ -66,7 +66,7 @@ class EduInstitution(models.Model):
     # email: VARCHAR(50), NOT NULL, UNIQUE
     email = models.CharField(max_length=50, unique=True)
 
-    # kod autoryzacji: VARCHAR(50), NOT NULL
+    # kod autoryzacyjny: VARCHAR(50), NOT NULL
     authorization_code = models.CharField(max_length=50)
 
     # czy wyższa: BIT, NOT NULL
@@ -89,7 +89,7 @@ class Team(models.Model):
     #      więc chyba też mogłóby być to pole typu Duration
 
     # data zgłoszenia: TIMESTAMP, NOT NULL, DEFAULT=NOW
-    application_date = models.DateTimeField(default=timezone.now())
+    application_date = models.DateTimeField(default=timezone.now)
 
     # priorytet: INTEGER, NOT NULL DEFAULT=1
     priority = models.IntegerField(default=1)

@@ -67,3 +67,21 @@
     grid-column-end: 3;
     width: 100%;
 }
+
+.tile-submit {
+    background-color: white;
+    border-radius: 15px;
+    padding: 20px 20px 20px 20px;
+    margin-bottom: 20px;
+    box-shadow: 3px 3px 3px #dddddd;
+    font-size: x-large;
+    font-weight: 400;
+    border: none;
+    width: 100%;
+    text-align: left;
+}
+
+.tile-submit:hover {
+    background-color: #D2D2D2;
+    cursor: pointer;
+}
