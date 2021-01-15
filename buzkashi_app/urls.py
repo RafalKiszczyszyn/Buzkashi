@@ -1,6 +1,6 @@
 from django.urls import path
-from temp.views import home_view, challenges_view, challenges_edit_view, rank_view, solutions_view,\
-    solutions_results_view, solutions_code_view, registration_view
+from .views import home_view, challenges_view, challenges_edit_view, rank_view, solutions_view,\
+    solutions_results_view, solutions_code_view, RegistrationView
 
 
 urlpatterns = [
@@ -12,6 +12,6 @@ urlpatterns = [
     path('solutions/', solutions_view, name='solutions'),
     path('solutions/results/<int:solution_id>', solutions_results_view, name='solutions_results'),
     path('solutions/code/<int:solution_id>', solutions_code_view, name='solutions_code'),
-    path('registration', registration_view, name='registration'),
+    path('registration', RegistrationView.as_view(), name='registration'),
 
 ]

@@ -85,8 +85,8 @@ class Team(models.Model):
     # data zgłoszenia: TIMESTAMP, NOT NULL, DEFAULT=NOW
     application_date = models.DateTimeField(default=timezone.now)
 
-    # priorytet: FLOAT, NOT NULL, DEFAULT=0
-    priority = models.FloatField(default=0)
+    # priorytet: INTEGER, NOT NULL, DEFAULT=0
+    priority = models.IntegerField(default=0)
 
     # czy zakwalifikowany: BIT, NOT NULL
     is_qualified = models.BooleanField(default=False)
@@ -98,7 +98,7 @@ class Team(models.Model):
     tutor = models.CharField(max_length=255, blank=True, null=True)
 
     # powiązane konto
-    associated_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     # zawody: FOREIGN KEY(Competition)
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
@@ -143,7 +143,7 @@ class Judge(models.Model):
     is_chief = models.BooleanField(default=False)
 
     # powiązane konto
-    associated_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Task(models.Model):
@@ -184,7 +184,7 @@ class AutomatedTest(models.Model):
     expected_output = models.FileField(upload_to='uploads/tests')
 
     # max czas wykonywania: ???, NOT NULL, TODO: DEFAULT?
-    max_time = models.DurationField()
+    max_time = models.DurationField(default=1)
 
     # zadanie: FOREIGN KEY(Task)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -262,7 +262,7 @@ class Solution(models.Model):
     source_code = models.FileField(upload_to='uploads/solutions')
 
     # język programowania: ???, NOT NULL, DEFAULT='JAVA'
-    programming_language = models.TextField(choices=SolutionStatus.choices, default=SolutionStatus.PENDING)
+    programming_language = models.TextField(choices=ProgrammingLanguage.choices, default=ProgrammingLanguage.JAVA)
 
     # autor: FOREIGN KEY(Team)
     author = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -270,8 +270,8 @@ class Solution(models.Model):
     # zadanie: FOREIGN KEY(Task)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
 
-    # status: ???, NOT NULL, DEFAULT=4
-    status = models.TextField(choices=SolutionStatus.choices, default=SolutionStatus.PENDING)
+    # status: ???
+    status = models.TextField(choices=SolutionStatus.choices, null=True, blank=True)
 
     # wersja: INTEGER. NOT NULL, DEFAULT=1
     version = models.IntegerField(default=1)
