@@ -224,6 +224,12 @@ class AutomatedTestResult(models.Model):
     # czas wykonywania: ???, NOT NULL
     runtime = models.DurationField()
 
+    # test: FOREIGN KEY(AutomatedTest)
+    test = models.ForeignKey(AutomatedTest, on_delete=models.CASCADE)
+
+    # rozwiazanie: FOREIGN KEY(Solution)
+    solution = models.ForeignKey(Task, on_delete=models.CASCADE)
+
 
 class Solution(models.Model):
     """
@@ -301,7 +307,7 @@ class Notice(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
 
     # zespół: FOREIGN KEY(Team)
-    team = models.ForeignKey(Team, on_delete=models.PROTECT)
+    author = models.ForeignKey(Team, on_delete=models.PROTECT)
 
 
 class Explanation(models.Model):
@@ -318,3 +324,6 @@ class Explanation(models.Model):
 
     # sędzia: FOREIGN KEY(Judge)
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
+
+    # uwaga: FOREIGN KEY(Notice)
+    notice = models.ForeignKey(Notice, on_delete=models.CASCADE)
