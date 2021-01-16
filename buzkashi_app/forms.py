@@ -47,3 +47,33 @@ class RegistrationComplimentForm(forms.Form):
     # priorytet zespołu
     priority = forms.IntegerField(label='Priorytet', min_value=1, required=False, initial=1,
                                   error_messages={0: 'Priorytet musi być większy od zera'})
+
+
+class TaskForm(forms.ModelForm):
+    class Meta:
+        model = models.Task
+        fields = [
+            'title',
+            'body'
+        ]
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'input-title',
+                                            'placeholder': 'Tytuł zadania'}),
+            'body': forms.Textarea(attrs={'class': 'input-text',
+                                          'placeholder': 'Wprowadź treść zadania'}),
+            # 'author': forms.Select(attrs={'disabled': True})
+        }
+
+
+# class TaskForm(forms.Form):
+#     title = forms.CharField(widget=forms.TextInput(
+#         attrs={
+#             'class': 'input-title',
+#             'placeholder': 'Tytuł zadania',
+#         }))
+#     body = forms.CharField(widget=forms.Textarea(
+#         attrs={
+#             'class': 'input-text',
+#             'placeholder': 'Wprowadź treść zadania',
+#         }
+#     ))

@@ -8,25 +8,20 @@
         <div class="title">Zadania</div>
 
         <div class="tile">
-            <form>
+            <form method="POST"> {% csrf_token %}
                 <div class="tile-grid">
                     <div class="tile-content">
-                        <input type="text" id="challenge-title" value="{{ task.title }}" placeholder="Tytuł zadania" class="input-title">
-                        {% if task.competition.session == 1 %}
-                            <h5>Sesja dla studentów</h5>
-                        {% elif task.competition.session == 2 %}}
-                            <h5>Sesja dla szkół</h5>
-                        {% endif %}
-                        <h6>{{ task.competition.title }}</h6>
+                        {{ form.title }}
                     </div>
                     <div class="tile-content-2">
-                        <textarea id="challenge-text" placeholder="Wprowadź treść zadania"
-                            class="input-text">{{ task.body }}</textarea>
+                        {{ form.body }}
                     </div>
 
+                    {{form.author}}
+
                     <div class="tile-buttons">
-                        <a href="#"><span>Anuluj</span></a>
-                        <a href="#"><span>Zapisz zmiany</span></a>
+                        <a href="{% url 'tasks' %}"><span>Anuluj</span></a>
+                        <input type="submit" value="Zapisz zmiany" />
                     </div>
                 </div>
             </form>

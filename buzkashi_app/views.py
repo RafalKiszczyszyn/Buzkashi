@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 
 # Create your views here.
 from django.views import View
 
 from . import forms
-from .models import Team, Task
+from .models import Team, Task, Judge
 
 
 def home_view(request, *args, **kwargs):
@@ -12,7 +12,13 @@ def home_view(request, *args, **kwargs):
 
 
 def tasks_view(request):
-    obj = Task.objects.all()
+    user_id = request.user.id
+    try:
+        judge_id = Judge.objects.get(user=user_id)
+        obj = Task.objects.filter(author=judge_id)
+    except:
+        obj = Task.objects.all()
+        print('YOU ARE NOT A JUDGE')
     context = {
         'tasks': obj
     }
@@ -20,9 +26,29 @@ def tasks_view(request):
 
 
 def task_edit_view(request, task_id):
-    obj = Task.objects.get(id=task_id)
+    task = get_object_or_404(Task, id=task_id)
+    form = forms.TaskForm(request.POST or None, instance=task)
+    if form.is_valid():
+        form.save()
+
     context = {
-        'task': obj
+        'form': form
+    }
+    return render(request, "task_edit.html", context)
+
+
+def task_create_view(request):
+    form = forms.TaskForm(request.POST or None)
+
+    if form.is_valid():
+        author = Judge.objects.get(user=request.user.id)
+
+        obj = form.save(commit=False)
+        obj.author = author
+        obj.save()
+
+    context = {
+        'form': form
     }
     return render(request, "task_edit.html", context)
 
@@ -46,7 +72,6 @@ def solutions_code_view(request, solution_id):
 
 
 class RegistrationView(View):
-
     template_name = 'registration.html'
     view_bag = {}
 
