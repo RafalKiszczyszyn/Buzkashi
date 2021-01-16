@@ -17,40 +17,12 @@
                     <h5>Zadania rozwiązane</h5>
                     <h5>Czas</h5>
 
-                    <p>1</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>2</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>3</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>4</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>2</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>3</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>4</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
+                    {% for team in teams %}
+                        <p>{{ forloop.counter }}</p>
+                        <p>{{ team.name }}</p>
+                        <p>4</p>
+                        <p>{{ team.score }}</p>
+                    {% endfor %}
 
                 </div>
             </div>
@@ -64,36 +36,6 @@
                     <h5>Czas</h5>
 
                     <p>1</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>2</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>3</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>4</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>2</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>3</p>
-                    <p>Czarni rycerze</p>
-                    <p>4</p>
-                    <p>0:00:00</p>
-
-                    <p>4</p>
                     <p>Czarni rycerze</p>
                     <p>4</p>
                     <p>0:00:00</p>

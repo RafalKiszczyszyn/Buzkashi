@@ -158,9 +158,6 @@ class Task(models.Model):
     # treść: VARCHAR(2000), NOT NULL
     body = models.CharField(max_length=2000)
 
-    # opis: VARCHAR(255)
-    description = models.CharField(max_length=255, blank=True, null=True)
-
     # autor: FOREIGN KEY(Judge)
     author = models.ForeignKey(Judge, on_delete=models.CASCADE)
 

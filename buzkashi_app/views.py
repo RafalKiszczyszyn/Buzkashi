@@ -4,22 +4,33 @@ from django.shortcuts import render, redirect
 from django.views import View
 
 from . import forms
+from .models import Team, Task
 
 
 def home_view(request, *args, **kwargs):
     return render(request, "index.html", {})
 
 
-def challenges_view(request, *args, **kwargs):
-    return render(request, "challenges.html", {})
+def tasks_view(request):
+    obj = Task.objects.all()
+    context = {
+        'tasks': obj
+    }
+    return render(request, "tasks.html", context)
 
 
-def challenges_edit_view(request, *args, **kwargs):
-    return render(request, "challenges-edit.html", {})
+def task_edit_view(request, task_id):
+    obj = Task.objects.get(id=task_id)
+    context = {
+        'task': obj
+    }
+    return render(request, "task_edit.html", context)
 
 
 def rank_view(request, *args, **kwargs):
-    return render(request, "rank.html", {})
+    teams = Team.objects.all()
+    context = {'teams': teams}
+    return render(request, "rank.html", context)
 
 
 def solutions_view(request):

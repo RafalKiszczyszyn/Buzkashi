@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+        <div class="title">Zadania</div>
+
+        <div class="tile">
+            <div class="tile-grid">
+                {% for task in tasks %}
+                <div class="tile-content">
+                    <h3>{{ task.title }}</h3>
+                    {% if task.competition.session == 1 %}
+                        <h5>Sesja dla studentów</h5>
+                    {% elif task.competition.session == 2 %}}
+                        <h5>Sesja dla szkół</h5>
+                    {% endif %}
+                    <h6>{{ task.competition.title }}</h6>
+                    <article>{{ task.body }}</article>
+                </div>
+                <div class="tile-buttons">
+                    <a href="{% url 'task_edit' task_id=task.id %}"><span>Edytuj zadanie</span></a>
+                    <a href="#"><span>Dodaj testy akceptacyjne</span></a>
+                    <a href="#"><span>Dodaj do zawodów</span></a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="tile">
+            <div class="tile-grid">
+                <div class="tile-content">
+                    <h3>Dodaj nowe zadanie</h3>
+                </div>
+            </div>
+        </div>
+
+{% endblock %}

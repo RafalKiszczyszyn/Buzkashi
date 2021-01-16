@@ -1,13 +1,13 @@
 from django.urls import path
-from .views import home_view, challenges_view, challenges_edit_view, rank_view, solutions_view,\
+from .views import home_view, tasks_view, task_edit_view, rank_view, solutions_view,\
     solutions_results_view, solutions_code_view, RegistrationView
 
 
 urlpatterns = [
 
     path('', home_view, name='home'),
-    path('challenges/', challenges_view, name='challenges'),
-    path('challenges-edit/', challenges_edit_view, name='challenges_edit'),
+    path('tasks/', tasks_view, name='tasks'),
+    path('task-edit/<int:task_id>', task_edit_view, name='task_edit'),
     path('rank/', rank_view, name='rank'),
     path('solutions/', solutions_view, name='solutions'),
     path('solutions/results/<int:solution_id>', solutions_results_view, name='solutions_results'),
