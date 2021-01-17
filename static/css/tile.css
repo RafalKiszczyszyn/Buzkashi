@@ -9,7 +9,7 @@
 .tile-grid {
     display: grid;
     grid-template-columns: auto 250px;
-    grid-gap: 25px;
+    grid-gap: 20px;
 }
 
 .tile-content {
