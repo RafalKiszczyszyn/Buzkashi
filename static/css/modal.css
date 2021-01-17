@@ -1,9 +1,22 @@
-.modal-dialog .tile {
-    position: relative;
-    max-width: 800px;
-    min-height: calc(100% - 3.5rem);
-    box-shadow: none;
+.modal-dialog {
+    max-width: 50vw;
+    margin: 30vh auto auto auto;
     pointer-events: auto;
+}
+
+.modal-dialog .tile {
+    box-shadow: none;
+}
+
+.modal-dialog .tile-grid {
+    display: grid;
+    grid-template-columns: auto 250px;
+    grid-gap: 25px;
+}
+
+.modal-dialog .tile-content {
+    grid-column-start: 1;
+    grid-column-end: 3;
 }
 
 .tile-content select {
@@ -19,23 +32,9 @@
 }
 
 .modal-dialog .tile-buttons {
-    right: 20px;
-}
-
-.modal-dialog .tile-grid {
-    display: grid;
-    grid-template-columns: auto 250px;
-    grid-gap: 25px;
-}
-
-.modal-dialog .tile-content {
-    grid-column-start: 1;
-    grid-column-end: 3;
-}
-
-.modal-dialog .tile-buttons {
     grid-column-start: 2;
     grid-column-end: 3;
+    right: 20px;
 }
 
 .modal-open {

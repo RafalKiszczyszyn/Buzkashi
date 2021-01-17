@@ -41,7 +41,8 @@ def task_edit_view(request, task_id):
         form.save()
 
     context = {
-        'form': form
+        'form': form,
+        'task': task
     }
     return render(request, "tasks/task_edit.html", context)
 
