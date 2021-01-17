@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 # Create your views here.
 from django.views import View
-from django.views.generic import CreateView, UpdateView, ListView
+from django.views.generic import CreateView, UpdateView
 
 from . import forms
 from .forms import TaskEditForm

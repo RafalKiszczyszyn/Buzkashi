@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import home_view, tasks_view, rank_view, solutions_view, \
-    solutions_results_view, solutions_code_view, RegistrationView, TaskCreateView, TaskEditView, TasksView
+from .views import home_view, rank_view, solutions_view, solutions_results_view, solutions_code_view, \
+    RegistrationView, TaskCreateView, TaskEditView, TasksView
 
 urlpatterns = [
 
