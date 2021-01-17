@@ -1,0 +1,23 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}"/>
+
+<div class="tile">
+    <form method="POST"> {% csrf_token %}
+        <div class="tile-grid">
+            <div class="tile-content">
+                <h3>Login</h3>
+                {% for input in form %}
+                <h6>{{ input.label }} {{ input }}</h6>
+                {% endfor %}
+            </div>
+            <div class="tile-buttons">
+                <input type="submit" value="Login"/>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
