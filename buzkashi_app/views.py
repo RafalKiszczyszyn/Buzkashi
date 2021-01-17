@@ -10,8 +10,12 @@ from .forms import TeamForm, EduInstitutionSelectForm, RegistrationComplimentFor
 from .models import Team, Task, Judge, Competition, Solution, AutomatedTest, AutomatedTestResult
 
 
-def home_view(request, *args, **kwargs):
+def home_view(request):
     return render(request, "index.html", {})
+
+
+def comps_view(request):
+    return render(request, "comps.html", {})
 
 
 class TasksView(View):
