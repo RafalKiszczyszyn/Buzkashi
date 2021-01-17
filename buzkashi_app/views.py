@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 
 from . import forms
-from .models import Team, Task, Judge
+from .models import Team, Task, Judge, Competition
 
 
 def home_view(request, *args, **kwargs):
@@ -12,15 +12,24 @@ def home_view(request, *args, **kwargs):
 
 
 def tasks_view(request):
-    user_id = request.user.id
-    try:
-        judge_id = Judge.objects.get(user=user_id)
-        obj = Task.objects.filter(author=judge_id)
-    except:
-        obj = Task.objects.all()
-        print('YOU ARE NOT A JUDGE')
+    judge = get_object_or_404(Judge, user=request.user)
+    tasks = Task.objects.filter(author=judge)
+
+    competitions = Competition.objects.all()
+
+    if request.method == "POST":
+        print(request.POST)
+        task_id = int(request.POST.get('input-task-id'))
+        competition_id = int(request.POST.get('select-comp'))
+        updated_task = get_object_or_404(Task, id=task_id)
+        competition = get_object_or_404(Competition, id=competition_id)
+
+        updated_task.competition = competition
+        updated_task.save()
+
     context = {
-        'tasks': obj
+        'tasks': tasks,
+        'competitions': competitions
     }
     return render(request, "tasks/tasks.html", context)
 

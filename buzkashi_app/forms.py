@@ -62,15 +62,3 @@ class TaskEditForm(forms.ModelForm):
             'body': forms.Textarea(attrs={'class': 'input-text',
                                           'placeholder': 'Wprowadź treść zadania'}),
         }
-
-
-class TaskModalForm(forms.ModelForm):
-    class Meta:
-        model = models.Task
-        fields = [
-            'competition'
-        ]
-        widgets = {
-            'competition': forms.TextInput(attrs={'class': 'select-comp'}),
-        }
-

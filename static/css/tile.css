@@ -35,7 +35,7 @@
     text-decoration: none;
 }
 
-.tile-buttons input {
+.tile-buttons > input {
     width: 250px;
     text-align: left;
     background-color: white;

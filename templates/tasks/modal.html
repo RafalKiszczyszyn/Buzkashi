@@ -1,0 +1,36 @@
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="tile">
+            <form action="." method="POST"> {% csrf_token %}
+                <div class="tile-grid">
+                    <div class="tile-content">
+                        <h3>{{ task.title }}</h3>
+                        <h6>Wybierz zawody, do których chcesz podpiąć zadanie</h6>
+
+                        <input type="hidden" name="input-task-id"/>
+                        <select name="select-comp">
+                            {% for comp in competitions %}
+                            <option value="{{ comp.id }}">{{ comp.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="tile-buttons">
+                        <input type="button" data-dismiss="modal" value="Anuluj"/>
+                        <input type="submit" value="Zapisz"/>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    $('#exampleModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget)
+        const task_id = button.data('whatever')
+        const modal = $(this)
+        modal.find('.tile-content input[name="input-task-id"]').val(task_id)
+    })
+</script>
