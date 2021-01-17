@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 from django.utils import timezone
 
 
@@ -164,6 +165,9 @@ class Task(models.Model):
 
     # zawody: FOREIGN KEY(Competition)
     competition = models.ForeignKey(Competition, blank=True, null=True, default=None, on_delete=models.PROTECT)
+
+    def get_absolute_url(self):
+        return reverse("task_edit", kwargs={"task_id": self.id})
 
 
 class AutomatedTest(models.Model):

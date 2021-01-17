@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 
 # Create your views here.
 from django.views import View
+from django.views.generic import CreateView, UpdateView, ListView
 
 from . import forms
+from .forms import TaskEditForm
 from .models import Team, Task, Judge, Competition
 
 
@@ -18,7 +20,6 @@ def tasks_view(request):
     competitions = Competition.objects.all()
 
     if request.method == "POST":
-        print(request.POST)
         task_id = int(request.POST.get('input-task-id'))
         competition_id = int(request.POST.get('select-comp'))
         updated_task = get_object_or_404(Task, id=task_id)
@@ -34,33 +35,32 @@ def tasks_view(request):
     return render(request, "tasks/tasks.html", context)
 
 
-def task_edit_view(request, task_id):
-    task = get_object_or_404(Task, id=task_id)
-    form = forms.TaskEditForm(request.POST or None, instance=task)
-    if form.is_valid():
-        form.save()
+class TaskEditView(UpdateView):
+    template_name = 'tasks/task_edit.html'
+    form_class = TaskEditForm
+    success_url = '/tasks'
 
-    context = {
-        'form': form,
-        'task': task
-    }
-    return render(request, "tasks/task_edit.html", context)
+    def get_object(self, **kwargs):
+        id_ = self.kwargs.get("task_id")
+        return get_object_or_404(Task, id=id_)
+
+    def form_valid(self, form):
+        return super().form_valid(form)
 
 
-def task_create_view(request):
-    form = forms.TaskEditForm(request.POST or None)
+class TaskCreateView(CreateView):
+    template_name = 'tasks/task_edit.html'
+    form_class = TaskEditForm
+    success_url = '/tasks'
 
-    if form.is_valid():
-        author = Judge.objects.get(user=request.user.id)
+    def form_valid(self, form):
+        author = Judge.objects.get(user=self.request.user.id)
 
         obj = form.save(commit=False)
         obj.author = author
         obj.save()
 
-    context = {
-        'form': form
-    }
-    return render(request, "tasks/task_edit.html", context)
+        return super().form_valid(form)
 
 
 def rank_view(request, *args, **kwargs):
