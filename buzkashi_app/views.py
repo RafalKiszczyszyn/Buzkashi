@@ -1,10 +1,9 @@
+from django.views.generic import CreateView, UpdateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-from django.views.generic import CreateView, UpdateView, ListView
 from django.forms import formset_factory
-from django.db import transaction, IntegrityError
-from django.contrib.auth.models import User
-from .forms import TaskEditForm, TeamForm, EduInstitutionSelectForm, RegistrationComplimentForm, ParticipantForm
+from django.db import transaction
+from .forms import TeamForm, EduInstitutionSelectForm, RegistrationComplimentForm, ParticipantForm, TaskEditForm
 from .models import Team, Task, Judge, Competition
 
 

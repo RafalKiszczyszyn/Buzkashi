@@ -43,3 +43,5 @@ bin/
 lib/
 db.sqlite3
 pyvenv.cfg
+
+static/chromedriver
