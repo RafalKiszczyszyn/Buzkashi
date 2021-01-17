@@ -1,11 +1,11 @@
 from django.urls import path
 from .views import home_view, tasks_view, rank_view, solutions_view, \
-    solutions_results_view, solutions_code_view, RegistrationView, TaskCreateView, TaskEditView
+    solutions_results_view, solutions_code_view, RegistrationView, TaskCreateView, TaskEditView, TasksView
 
 urlpatterns = [
 
     path('', home_view, name='home'),
-    path('tasks/', tasks_view, name='tasks'),
+    path('tasks/', TasksView.as_view(), name='tasks'),
     path('tasks/<int:task_id>', TaskEditView.as_view(), name='task_edit'),
     path('tasks/create/', TaskCreateView.as_view(), name='task_create'),
     path('rank/', rank_view, name='rank'),

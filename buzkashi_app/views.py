@@ -13,26 +13,30 @@ def home_view(request, *args, **kwargs):
     return render(request, "index.html", {})
 
 
-def tasks_view(request):
-    judge = get_object_or_404(Judge, user=request.user)
-    tasks = Task.objects.filter(author=judge)
+class TasksView(View):
+    template_name = 'tasks/tasks.html'
+    success_url = '/tasks'
+    queryset = Task.objects.all()
+    view_bag = {}
 
-    competitions = Competition.objects.all()
+    def get(self, request):
+        logged_judge = get_object_or_404(Judge, user=request.user)
+        self.view_bag['tasks'] = Task.objects.filter(author=logged_judge)
+        self.view_bag['competitions'] = Competition.objects.all()
 
-    if request.method == "POST":
+        return render(request, self.template_name, self.view_bag)
+
+    def post(self, request):
         task_id = int(request.POST.get('input-task-id'))
         competition_id = int(request.POST.get('select-comp'))
+
         updated_task = get_object_or_404(Task, id=task_id)
         competition = get_object_or_404(Competition, id=competition_id)
 
         updated_task.competition = competition
         updated_task.save()
 
-    context = {
-        'tasks': tasks,
-        'competitions': competitions
-    }
-    return render(request, "tasks/tasks.html", context)
+        return self.get(request)
 
 
 class TaskEditView(UpdateView):
