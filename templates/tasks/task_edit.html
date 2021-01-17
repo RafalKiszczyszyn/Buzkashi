@@ -3,27 +3,27 @@
 {% load static %}
 
 {% block content %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/tile-h.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'css/tile-h.css' %}"/>
 
-        <div class="title">Zadania</div>
+<div class="title">Zadania</div>
 
-        <div class="tile">
-            <form method="POST"> {% csrf_token %}
-                <div class="tile-grid">
-                    <div class="tile-content">
-                        {{ form.title }}
-                    </div>
-                    <div class="tile-content-2">
-                        {{ form.body }}
-                    </div>
+<div class="tile">
+    <form method="POST"> {% csrf_token %}
+        <div class="tile-grid">
+            <div class="tile-content">
+                {{ form.title }}
+            </div>
+            <div class="tile-content-2">
+                {{ form.body }}
+            </div>
 
-                    {{form.author}}
+            {{form.author}}
 
-                    <div class="tile-buttons">
-                        <a href="{% url 'tasks' %}"><span>Anuluj</span></a>
-                        <input type="submit" value="Zapisz zmiany" />
-                    </div>
-                </div>
-            </form>
+            <div class="tile-buttons">
+                <a href="{% url 'tasks' %}"><span>Anuluj</span></a>
+                <input type="submit" value="Zapisz zmiany"/>
+            </div>
         </div>
+    </form>
+</div>
 {% endblock %}
