@@ -49,7 +49,7 @@ class RegistrationComplimentForm(forms.Form):
                                   error_messages={0: 'Priorytet musi być większy od zera'})
 
 
-class TaskForm(forms.ModelForm):
+class TaskEditForm(forms.ModelForm):
     class Meta:
         model = models.Task
         fields = [
@@ -61,19 +61,16 @@ class TaskForm(forms.ModelForm):
                                             'placeholder': 'Tytuł zadania'}),
             'body': forms.Textarea(attrs={'class': 'input-text',
                                           'placeholder': 'Wprowadź treść zadania'}),
-            # 'author': forms.Select(attrs={'disabled': True})
         }
 
 
-# class TaskForm(forms.Form):
-#     title = forms.CharField(widget=forms.TextInput(
-#         attrs={
-#             'class': 'input-title',
-#             'placeholder': 'Tytuł zadania',
-#         }))
-#     body = forms.CharField(widget=forms.Textarea(
-#         attrs={
-#             'class': 'input-text',
-#             'placeholder': 'Wprowadź treść zadania',
-#         }
-#     ))
+class TaskModalForm(forms.ModelForm):
+    class Meta:
+        model = models.Task
+        fields = [
+            'competition'
+        ]
+        widgets = {
+            'competition': forms.TextInput(attrs={'class': 'select-comp'}),
+        }
+

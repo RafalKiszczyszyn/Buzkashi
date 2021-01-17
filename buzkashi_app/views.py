@@ -22,23 +22,23 @@ def tasks_view(request):
     context = {
         'tasks': obj
     }
-    return render(request, "tasks.html", context)
+    return render(request, "tasks/tasks.html", context)
 
 
 def task_edit_view(request, task_id):
     task = get_object_or_404(Task, id=task_id)
-    form = forms.TaskForm(request.POST or None, instance=task)
+    form = forms.TaskEditForm(request.POST or None, instance=task)
     if form.is_valid():
         form.save()
 
     context = {
         'form': form
     }
-    return render(request, "task_edit.html", context)
+    return render(request, "tasks/task_edit.html", context)
 
 
 def task_create_view(request):
-    form = forms.TaskForm(request.POST or None)
+    form = forms.TaskEditForm(request.POST or None)
 
     if form.is_valid():
         author = Judge.objects.get(user=request.user.id)
@@ -50,7 +50,7 @@ def task_create_view(request):
     context = {
         'form': form
     }
-    return render(request, "task_edit.html", context)
+    return render(request, "tasks/task_edit.html", context)
 
 
 def rank_view(request, *args, **kwargs):
