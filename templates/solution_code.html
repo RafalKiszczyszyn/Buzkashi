@@ -23,40 +23,25 @@
 {% block content %}
 
 <div style="float: right">
-    <a href="{% url 'solutions_results' solution_id=1 %}" class="button-secondary">Wyniki testów</a>
-    <a href="{% url 'solutions_code' solution_id=1 %}" class="button-secondary button-secondary-active-black">Kod źródłowy</a>
+    <a href="{% url 'solution_results' solution_id=1 %}" class="button-secondary">Wyniki testów</a>
+    <a href="{% url 'solution_code' solution_id=1 %}" class="button-secondary button-secondary-active-black">Kod źródłowy</a>
 </div>
 
 <div class="title">
     <a class="light-link" href="{% url 'solutions' %}"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
-    Rozwiązanie zespołu Czarni rycerze
+    Rozwiązanie zespołu {{ solution.author.name }}
 </div>
 
 <div class="tile">
 
-    <h3 style="float: right">C#</h3>
+    <h3 style="float: right">{{ solution.programming_language }}</h3>
     <h3>Kod źródłowy</h3>
 
     <div class="tile-grid">
 
         <div class="tile-grid-span">
 
-        <pre>
-            <code class="cs">
-using System;
-
-namespace HelloWorld
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World!");
-        }
-    }
-}
-            </code>
-        </pre>
+        <pre><code>{{ source_code }}</code></pre>
 
          </div>
 

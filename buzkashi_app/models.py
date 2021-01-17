@@ -223,6 +223,9 @@ class Solution(models.Model):
     # autor: FOREIGN KEY(Team)
     author = models.ForeignKey(Team, on_delete=models.CASCADE)
 
+    # sędzia: FOREIGN KEY(Judge)
+    judge = models.ForeignKey(Judge, on_delete=models.CASCADE, default=None)
+
     # zadanie: FOREIGN KEY(Task)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
 

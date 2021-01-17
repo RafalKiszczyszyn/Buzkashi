@@ -19,13 +19,13 @@
 {% block content %}
 
 <div style="float: right">
-    <a href="{% url 'solutions_results' solution_id=1 %}" class="button-secondary button-secondary-active-black">Wyniki testów</a>
-    <a href="{% url 'solutions_code' solution_id=1 %}" class="button-secondary">Kod źródłowy</a>
+    <a href="{% url 'solution_results' solution_id=1 %}" class="button-secondary button-secondary-active-black">Wyniki testów</a>
+    <a href="{% url 'solution_code' solution_id=1 %}" class="button-secondary">Kod źródłowy</a>
 </div>
 
 <div class="title">
     <a class="light-link" href="{% url 'solutions' %}"><i class="fa fa-chevron-left" aria-hidden="true"></i></a>
-    Rozwiązanie zespołu Czarni rycerze
+    Rozwiązanie zespołu {{ solution.author.name }}
 </div>
 
 <div class="tile">
@@ -46,12 +46,21 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for result in results %}
                     <tr>
-                        <td>1.</td>
-                        <td>Test pierwszy</td>
-                        <td><pre><samp>Hello World!</samp></pre></td>
-                        <td><pre><samp>Hello World!</samp></pre></td>
+                        <td>{{ forloop.counter }}.</td>
+                        <td>{{ result.0 }}</td>
+                        <td><pre><samp>{{ result.1 }}</samp></pre></td>
+                        <td><pre><samp>{{ result.2 }}</samp></pre></td>
                     </tr>
+                    {% empty %}
+                    <tr>
+                        <td>---</td>
+                        <td>---</td>
+                        <td>---</td>
+                        <td>---</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
 
             </table>

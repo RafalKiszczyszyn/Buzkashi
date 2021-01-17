@@ -18,7 +18,7 @@
 <div class="title">Rozwiązania</div>
 
 <div class="tile">
-    <h3>Nazwa zawodów</h3>
+    <h3>{{ competition_name|default:'Brak odbywających się zawodów' }}</h3>
     <table class="table table-fixed">
         <thead>
             <tr>
@@ -29,12 +29,22 @@
             </tr>
         </thead>
         <tbody>
+            {% for solution in solutions %}
             <tr>
-                <td>1.</td>
-                <td>Czarni rycerze</td>
+                <td>{{ forloop.counter }}.</td>
+                <td>{{ solution.author.name }}</td>
                 <td>46 min</td>
-                <td><a class="light-link" href="{% url 'solutions_results' solution_id=1 %}">Szczegóły</a></td>
+                <td><a class="light-link" href="{% url 'solution_results' solution_id=solution.id %}">Szczegóły</a></td>
             </tr>
+            {% empty %}
+            <tr>
+                <td>---</td>
+                <td>---</td>
+                <td>---</td>
+                <td></td>
+            </tr>
+            {% endfor %}
+
         </tbody>
     </table>
 </div>

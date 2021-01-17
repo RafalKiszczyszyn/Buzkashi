@@ -1,10 +1,13 @@
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, UpdateView
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.forms import formset_factory
 from django.db import transaction
 from .forms import TeamForm, EduInstitutionSelectForm, RegistrationComplimentForm, ParticipantForm, TaskEditForm
-from .models import Team, Task, Judge, Competition
+from .models import Team, Task, Judge, Competition, Solution, AutomatedTest, AutomatedTestResult
 
 
 def home_view(request, *args, **kwargs):
@@ -71,16 +74,84 @@ def rank_view(request, *args, **kwargs):
     return render(request, "rank.html", context)
 
 
-def solutions_view(request):
-    return render(request, "solutions.html", {})
+class SolutionsView(View):
+
+    template_name = 'solutions.html'
+
+    def __init__(self, *args, **kwargs):
+        super(SolutionsView, self).__init__(*args, **kwargs)
+        self.context = {}
+
+    @method_decorator(login_required)
+    def get(self, request):
+        solutions = Solution.objects.filter(judge_id=request.user.id).filter(status=Solution.SolutionStatus.PENDING)
+        self.context['solutions'] = solutions
+
+        return render(request, self.template_name, self.context)
 
 
-def solutions_results_view(request, solution_id):
-    return render(request, "solutions_results.html", {})
+class SolutionResultsView(View):
+
+    template_name = 'solution_results.html'
+
+    def __init__(self, *args, **kwargs):
+        super(SolutionResultsView, self).__init__(*args, **kwargs)
+        self.context = {}
+
+    @method_decorator(login_required)
+    def get(self, request, solution_id):
+        try:
+            solution = Solution.objects.select_related('author').get(id=solution_id)
+        except Solution.DoesNotExist:
+            return HttpResponse(status=404)
+
+        results = AutomatedTestResult.objects.select_related('test').filter(solution=solution)
+
+        self.context['solution'] = solution
+        self.__unpack_results(results)
+
+        return render(request, self.template_name, self.context)
+
+    def __unpack_results(self, results):
+        unpacked = []
+        for result in results:
+            title = result.test.title
+
+            result.test.expected_output.open('r')
+            expected_output = result.test.expected_output.read()
+            result.test.expected_output.close()
+
+            result.output.open('r')
+            output = result.output.read()
+            result.output.close()
+
+            unpacked.append((title, expected_output, output))
+
+        self.context['results'] = unpacked
 
 
-def solutions_code_view(request, solution_id):
-    return render(request, "solutions_code.html", {})
+class SolutionCodeView(View):
+
+    template_name = 'solution_code.html'
+
+    def __init__(self, *args, **kwargs):
+        super(SolutionCodeView, self).__init__(*args, **kwargs)
+        self.context = {}
+
+    @method_decorator(login_required)
+    def get(self, request, solution_id):
+        try:
+            solution = Solution.objects.select_related('author').get(id=solution_id)
+        except Solution.DoesNotExist:
+            return HttpResponse(status=404)
+
+        solution.source_code.open('r')
+        self.context['source_code'] = solution.source_code.read()
+        solution.source_code.close()
+
+        self.context['solution'] = solution
+
+        return render(request, self.template_name, self.context)
 
 
 class RegistrationView(View):
