@@ -11,8 +11,15 @@
 
 <body>
     <header>
-        {% include 'base/topbar-logged.html' %}
-        {% include 'base/sidebar.html' %}
+        {% if user.is_authenticated %}
+            {% include 'base/topbar-logged.html' %}
+            {% include 'base/sidebar.html' %}
+        {% else %}
+            {% include 'base/topbar.html' %}
+            {% include 'base/sidebar-guest.html' %}
+        {% endif %}
+
+
     </header>
     <main>
         {% block content %}
