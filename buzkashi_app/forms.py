@@ -13,21 +13,54 @@ class ParticipantForm(forms.ModelForm):
         """
 
         model = models.Participant
-        fields = ['name', 'surname']
+        fields = ['name', 'surname', 'email']
 
         labels = {
             'name': 'Imię',
-            'surname': 'Nazwisko'
+            'surname': 'Nazwisko',
+            'email': 'E-mail'
         }
 
 
-class EduInstituteSelectForm(forms.Form):
+class TeamForm(forms.ModelForm):
+    """
+    Klasa formularzu dla zespołu
+    """
+
+    class Meta:
+        """
+        Klasa wskazująca, które pola z modelu zespolu mają być powiązane z formularzem
+        """
+
+        model = models.Team
+        fields = ['name']
+
+        labels = {
+            'name': 'Nazwa'
+        }
+
+        error_messages = {
+            'name': {'unique': 'Wybrana nazwa jest już zajęta'}
+        }
+
+
+class EduInstitutionSelectForm(forms.Form):
     """
     Klasa formularzu wyboru placówki edukacyjnej
     """
 
+    class EduInstitutionChoiceField(forms.ModelChoiceField):
+        def label_from_instance(self, obj):
+            """
+            Nadpisuje sposób w jaki reprezentowany jest obiekt użytkownikowi
+
+            @param obj: instancja modelu placówki edukacyjnej
+            @return: 'nazwa, rejon'
+            """
+            return f"{obj.name}, {obj.region}"
+
     # placówka edukacyjna
-    edu_institute = forms.ModelChoiceField(label='Nazwa', queryset=None)
+    institution = EduInstitutionChoiceField(label='Nazwa', queryset=models.EduInstitution.objects.all())
 
 
 class RegistrationComplimentForm(forms.Form):
@@ -48,6 +81,19 @@ class RegistrationComplimentForm(forms.Form):
     priority = forms.IntegerField(label='Priorytet', min_value=1, required=False, initial=1,
                                   error_messages={0: 'Priorytet musi być większy od zera'})
 
+    def __init__(self, *args, **kwargs):
+        super(RegistrationComplimentForm, self).__init__(*args, **kwargs)
+        self.valid_auth_code = None
+
+    def set_valid_auth_code(self, valid_auth_code):
+        self.valid_auth_code = valid_auth_code
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if self.valid_auth_code != cleaned_data['authorization_code']:
+            self.add_error('authorization_code', 'Niepoprawny kod')
+
 
 class TaskEditForm(forms.ModelForm):
     class Meta:
@@ -62,3 +108,4 @@ class TaskEditForm(forms.ModelForm):
             'body': forms.Textarea(attrs={'class': 'input-text',
                                           'placeholder': 'Wprowadź treść zadania'}),
         }
+

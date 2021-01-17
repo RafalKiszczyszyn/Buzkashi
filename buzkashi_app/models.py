@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
-
+from datetime import datetime, timedelta, time
 
 # Create your models here.
 
@@ -47,6 +47,15 @@ class Competition(models.Model):
 
     # TODO: tutaj powinny być klucze obce do rankingu, ale nie wiadomo czy będzię on przechowywany w bazie
 
+    @classmethod
+    def get_coming_competitions(cls):
+        now = timezone.now()
+        cur_date = datetime(year=now.year, month=now.month, day=now.day, tzinfo=now.tzinfo)
+        search_from = cur_date + timedelta(weeks=1)
+
+        query_set = Competition.objects.filter(start_date__gte=search_from)
+        return query_set
+
 
 class EduInstitution(models.Model):
     """
@@ -82,7 +91,7 @@ class Team(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
     # ocena: ???, NOT NULL, DEFAULT=0
-    score = models.DurationField(default=0)
+    score = models.DurationField(default=timedelta(seconds=0))
 
     # data zgłoszenia: TIMESTAMP, NOT NULL, DEFAULT=NOW
     application_date = models.DateTimeField(default=timezone.now)
@@ -100,10 +109,12 @@ class Team(models.Model):
     tutor = models.CharField(max_length=255, blank=True, null=True)
 
     # powiązane konto
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    # null=True?
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     # zawody: FOREIGN KEY(Competition)
-    competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
+    # NULLABLE tylko do testów
+    competition = models.ForeignKey(Competition, on_delete=models.CASCADE, null=True, blank=True)
 
     # placówka edukacyjna: FOREIGN KEY(EduInstitute)
     institution = models.ForeignKey(EduInstitution, on_delete=models.PROTECT)
@@ -170,69 +181,6 @@ class Task(models.Model):
         return reverse("task_edit", kwargs={"task_id": self.id})
 
 
-class AutomatedTest(models.Model):
-    """
-    Klasa ORM testu automatycznego
-    id generowane automatycznie
-    """
-
-    # tytuł: VARCHAR(255), NOT NULL
-    title = models.CharField(max_length=255)
-
-    # dane wejsciowe: FILE ?, NOT NULL TODO: jaka ścieżka zapisu?
-    input = models.FileField(upload_to='uploads/tests')
-
-    # oczekiwane dane wyjsciowe: FILE ?, NOT NULL
-    expected_output = models.FileField(upload_to='uploads/tests')
-
-    # max czas wykonywania: ???, NOT NULL, TODO: DEFAULT?
-    max_time = models.DurationField(default=1)
-
-    # zadanie: FOREIGN KEY(Task)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
-
-
-class AutomatedTestResult(models.Model):
-    """
-    Klasa ORM wyniku testu automatycznego
-    id generowane automatycznie
-    """
-
-    class TestStatus(models.IntegerChoices):
-        """
-        Enumerator dla statusu wyniku testu
-        """
-        # zaakceptowane
-        PASSED = 0
-
-        # przekroczony czas wykonywania
-        TIME_EXCEEDED_ERROR = 1
-
-        # błąd kompilacji
-        COMPILATION_ERROR = 2
-
-        # błąd wykonywania
-        RUNTIME_ERROR = 3
-
-        # niezaakceptowane
-        FAILED = 4
-
-    # dane wyjściowe: FILE ?, NOT NULL
-    output = models.FileField(upload_to='uploads/test_results')
-
-    # status: INTEGER, NOT NULL, DEFAULT=4
-    status = models.TextField(choices=TestStatus.choices, default=TestStatus.FAILED)
-
-    # czas wykonywania: ???, NOT NULL
-    runtime = models.DurationField()
-
-    # test: FOREIGN KEY(AutomatedTest)
-    test = models.ForeignKey(AutomatedTest, on_delete=models.CASCADE)
-
-    # rozwiazanie: FOREIGN KEY(Solution)
-    solution = models.ForeignKey(Task, on_delete=models.CASCADE)
-
-
 class Solution(models.Model):
     """
     Klasa ORM rozwiązania
@@ -290,6 +238,69 @@ class Solution(models.Model):
     # TODO: ocena wyliczana po zaakceptowaniu, uwzględnia czas złożenia i wersję
 
 
+class AutomatedTest(models.Model):
+    """
+    Klasa ORM testu automatycznego
+    id generowane automatycznie
+    """
+
+    # tytuł: VARCHAR(255), NOT NULL
+    title = models.CharField(max_length=255)
+
+    # dane wejsciowe: FILE ?, NOT NULL TODO: jaka ścieżka zapisu?
+    input = models.FileField(upload_to='uploads/tests')
+
+    # oczekiwane dane wyjsciowe: FILE ?, NOT NULL
+    expected_output = models.FileField(upload_to='uploads/tests')
+
+    # max czas wykonywania: ???, NOT NULL, TODO: DEFAULT?
+    max_time = models.DurationField(default=timedelta(seconds=1))
+
+    # zadanie: FOREIGN KEY(Task)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+
+
+class AutomatedTestResult(models.Model):
+    """
+    Klasa ORM wyniku testu automatycznego
+    id generowane automatycznie
+    """
+
+    class TestStatus(models.IntegerChoices):
+        """
+        Enumerator dla statusu wyniku testu
+        """
+        # zaakceptowane
+        PASSED = 0
+
+        # przekroczony czas wykonywania
+        TIME_EXCEEDED_ERROR = 1
+
+        # błąd kompilacji
+        COMPILATION_ERROR = 2
+
+        # błąd wykonywania
+        RUNTIME_ERROR = 3
+
+        # niezaakceptowane
+        FAILED = 4
+
+    # dane wyjściowe: FILE ?, NOT NULL
+    output = models.FileField(upload_to='uploads/test_results')
+
+    # status: INTEGER, NOT NULL, DEFAULT=4
+    status = models.TextField(choices=TestStatus.choices, default=TestStatus.FAILED)
+
+    # czas wykonywania: ???, NOT NULL
+    runtime = models.DurationField(default=None)
+
+    # test: FOREIGN KEY(AutomatedTest)
+    test = models.ForeignKey(AutomatedTest, on_delete=models.CASCADE, default=None)
+
+    # rozwiazanie: FOREIGN KEY(Solution)
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, default=None)
+
+
 class Notice(models.Model):
     """
     Klasa ORM uwaga
@@ -297,19 +308,19 @@ class Notice(models.Model):
     """
 
     # tytuł: VARCHAR(50), NOT NULL
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, default='')
 
     # treść: ???(500), NOT NULL
-    body = models.TextField(max_length=500)
+    body = models.TextField(max_length=500, default='')
 
     # data opublikowania: TIMESTAMP, NOT NULL, DEFAULT=NOW
     publication_date = models.DateTimeField(default=timezone.now)
 
     # zadanie: FOREIGN KEY(Task)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, default=None)
 
     # zespół: FOREIGN KEY(Team)
-    author = models.ForeignKey(Team, on_delete=models.PROTECT)
+    author = models.ForeignKey(Team, on_delete=models.PROTECT, default=None)
 
 
 class Explanation(models.Model):
@@ -319,13 +330,13 @@ class Explanation(models.Model):
     """
 
     # treść: ???, NOT NULL
-    body = models.TextField()
+    body = models.TextField(default=None)
 
     # data opublikowania: TIMESTAMP, NOT NULL, DEFAULT=NOW
     publication_date = models.DateTimeField(default=timezone.now)
 
     # sędzia: FOREIGN KEY(Judge)
-    judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
+    judge = models.ForeignKey(Judge, on_delete=models.CASCADE, default=None)
 
     # uwaga: FOREIGN KEY(Notice)
-    notice = models.ForeignKey(Notice, on_delete=models.CASCADE)
+    notice = models.ForeignKey(Notice, on_delete=models.CASCADE, default=None)

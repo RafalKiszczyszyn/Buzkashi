@@ -13,6 +13,8 @@
 <form action="{% url 'registration' %}" method="post">
     {% csrf_token %}
 
+    {{ management_form }}
+
     <!-- RZAWODNICY -->
     <div class="tile">
         <h3>Krok 1. Dane zawodników</h3>
@@ -42,7 +44,7 @@
                 <h6>Drugi zawodnik w zespole</h6>
 
                 <div class="form-grid">
-                    {% for field in participant2 %}
+                    {% for field in participant1 %}
                         {{ field.label_tag }}
                         {{ field }}
                         {% if field.errors %}
@@ -62,7 +64,7 @@
                 <h6>Trzeci zawodnik w zespole</h6>
 
                 <div class="form-grid">
-                    {% for field in participant3 %}
+                    {% for field in participant2 %}
                         {{ field.label_tag }}
                         {{ field }}
                         {% if field.errors %}
@@ -112,7 +114,7 @@
                 <h6>Wybierz reprezentowaną uczelnię/szkołę</h6>
 
                 <div class="form-grid">
-                    {% for field in institute %}
+                    {% for field in institution %}
                         {{ field.label_tag }}
                         {{ field }}
                         {% if field.errors %}

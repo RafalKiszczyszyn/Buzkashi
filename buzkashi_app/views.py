@@ -1,11 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-
-# Create your views here.
 from django.views import View
 from django.views.generic import CreateView, UpdateView, ListView
-
-from . import forms
-from .forms import TaskEditForm
+from django.forms import formset_factory
+from django.db import transaction, IntegrityError
+from django.contrib.auth.models import User
+from .forms import TaskEditForm, TeamForm, EduInstitutionSelectForm, RegistrationComplimentForm, ParticipantForm
 from .models import Team, Task, Judge, Competition
 
 
@@ -86,23 +85,93 @@ def solutions_code_view(request, solution_id):
 
 
 class RegistrationView(View):
+
     template_name = 'registration.html'
-    view_bag = {}
+    ParticipantFormSet = formset_factory(ParticipantForm, extra=3)
+
+    def __init__(self, *args, **kwargs):
+        super(RegistrationView, self).__init__(*args, **kwargs)
+        self.context = {}
 
     def get(self, request):
-        self.view_bag['captain'] = forms.ParticipantForm
-        self.view_bag['compliment'] = forms.RegistrationComplimentForm()
+        formset = self.ParticipantFormSet()
+        self.__load_forms(formset)
 
-        return render(request, self.template_name, self.view_bag)
+        return render(request, self.template_name, self.context)
 
     def post(self, request):
-        captain = forms.ParticipantForm(request.POST)
-        compliment = forms.RegistrationComplimentForm(request.POST)
+        participant_formset = self.ParticipantFormSet(request.POST)
+        team_form = TeamForm(request.POST)
+        institution_form = EduInstitutionSelectForm(request.POST)
+        compliment_form = RegistrationComplimentForm(request.POST)
 
-        if captain.is_valid() and compliment.is_valid():
-            return redirect(request, 'home')
+        if self.__is_valid(participant_formset, team_form, institution_form, compliment_form):
+            self.__save_models(participant_formset, team_form, institution_form, compliment_form)
+            return redirect('home')
 
-        self.view_bag['captain'] = captain
-        self.view_bag['compliment'] = compliment
+        self.__load_forms(participant_formset, team_form, institution_form, compliment_form)
+        return render(request, self.template_name, self.context)
 
-        return render(request, self.template_name, self.view_bag)
+    def __is_valid(self, participant_formset, team_form, institution_form, compliment_form):
+        is_valid = True
+
+        # czy dane zawodników są poprawne
+        if not participant_formset.is_valid():
+            is_valid = False
+
+        # czy zespół ma unikalną nazwę
+        if not team_form.is_valid():
+            is_valid = False
+
+        # czy wybrano istniejącą placówkę edukacyjną
+        if not institution_form.is_valid():
+            is_valid = False
+
+        institution = institution_form.cleaned_data['institution']
+        # jezeli wybrano szkołę średnią sprawdź poprawność danych uzupełniających
+        if not institution.is_university:
+            compliment_form.set_valid_auth_code(institution.authorization_code)
+            if not compliment_form.is_valid():
+                self.context['need_compliment'] = True
+                is_valid = False
+
+        return is_valid
+
+    @classmethod
+    def __save_models(cls, participant_formset, team_form, institution_form, compliment_form):
+        team = team_form.save(commit=False)
+        institution = institution_form.cleaned_data['institution']
+
+        if not institution.is_university:
+            team.tutor = f"{compliment_form.cleaned_data['tutor_name']} " \
+                         f"{compliment_form.cleaned_data['tutor_surname']}"
+            team.priority = compliment_form.cleaned_data['priority']
+
+        team.institution = institution
+
+        participants = []
+        for participant_form in participant_formset:
+            participant = participant_form.save(commit=False)
+            participant.team = team
+            participants.append(participant)
+        participants[0].is_capitan = True
+
+        with transaction.atomic():
+            team.save()
+            for participant in participants:
+                participant.save()
+
+        return True
+
+    def __load_forms(self, participants,
+                     team=TeamForm(),
+                     institution=EduInstitutionSelectForm(),
+                     compliment=RegistrationComplimentForm()):
+
+        self.context['management_form'] = participants.management_form
+        self.context['captain'] = participants[0]
+        self.context['participant1'] = participants[1]
+        self.context['participant2'] = participants[2]
+        self.context['team'] = team
+        self.context['institution'] = institution
+        self.context['compliment'] = compliment
