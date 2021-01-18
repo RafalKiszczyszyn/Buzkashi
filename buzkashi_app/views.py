@@ -22,14 +22,17 @@ class TasksView(View):
     template_name = 'tasks/tasks.html'
     success_url = '/tasks'
     queryset = Task.objects.all()
-    view_bag = {}
+
+    def __init__(self, *args, **kwargs):
+        super(TasksView, self).__init__(*args, **kwargs)
+        self.context = {}
 
     def get(self, request):
         logged_judge = get_object_or_404(Judge, user=request.user)
-        self.view_bag['tasks'] = Task.objects.filter(author=logged_judge)
-        self.view_bag['competitions'] = Competition.objects.all()
+        self.context['tasks'] = Task.objects.filter(author=logged_judge)
+        self.context['competitions'] = Competition.objects.all()
 
-        return render(request, self.template_name, self.view_bag)
+        return render(request, self.template_name, self.context)
 
     def post(self, request):
         task_id = int(request.POST.get('input-task-id'))
