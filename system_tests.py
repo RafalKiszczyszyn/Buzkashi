@@ -1,4 +1,4 @@
-import time
+from urllib.parse import urljoin
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 
@@ -12,20 +12,22 @@ class JudgeViewTest(StaticLiveServerTestCase):
     def tearDown(self) -> None:
         self.browser.close()
 
-    def test_if_sidebar_home_works(self):
-        initial_url = self.live_server_url
-        self.browser.get(initial_url)
-        sidebar_menu_home = self.browser.find_element_by_id('sidebar-home')
-        sidebar_menu_home.click()
-        self.assertEqual(initial_url, self.live_server_url)
-        sidebar_menu_button = self.browser.find_element_by_id('btn-sidebar')
-        sidebar_menu_button.click()
-        time.sleep(5)
-        sidebar_menu_button.click()
+    def test_login(self):
+        base_url = self.live_server_url
+        self.browser.get(base_url)
+        login_button = self.browser.find_element_by_id('topbar-button-login')
+        login_button.click()
 
-    def test_if_sidebar_tasks_works(self):
-        initial_url = self.live_server_url
-        self.browser.get(initial_url)
+        input_login = self.browser.find_element_by_id('id_username')
+        input_login.send_keys('limi')
+        input_password = self.browser.find_element_by_id('id_password')
+        input_password.send_keys('limi')
+        submit_button = self.browser.find_element_by_id('submit-button')
+        submit_button.click()
+
+    def test_sidebar_rank_button(self):
+        self.browser.get(self.live_server_url)
         sidebar_menu_rank = self.browser.find_element_by_id('sidebar-rank')
         sidebar_menu_rank.click()
-        time.sleep(10)
+
+        self.assertEqual(self.browser.current_url, urljoin(self.live_server_url, '/rank/'))
