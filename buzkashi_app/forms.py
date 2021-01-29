@@ -63,6 +63,17 @@ class EduInstitutionSelectForm(forms.Form):
     institution = EduInstitutionChoiceField(label='Nazwa', queryset=models.EduInstitution.objects.all())
 
 
+class CompetitionSelectForm(forms.Form):
+
+    class CompetitionChoiceField(forms.ModelChoiceField):
+        def label_from_instance(self, obj):
+            return f'{obj.title}, ' \
+                   f'{"uczelnie wyższe" if obj.session == models.Competition.Session.UNIVERSITY_SESSION else "szkoły średnie"}, ' \
+                   f'{obj.start_date}'
+
+    competition = CompetitionChoiceField(label='Zawody', queryset=models.Competition.get_coming_competitions())
+
+
 class RegistrationComplimentForm(forms.Form):
     """
     Klasa formularzu danych uzupełniających rejestracje dla szkół średnich

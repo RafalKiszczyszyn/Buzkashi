@@ -15,7 +15,7 @@
 
     {{ management_form }}
 
-    <!-- RZAWODNICY -->
+    <!-- ZAWODNICY -->
     <div class="tile">
         <h3>Krok 1. Dane zawodników</h3>
 
@@ -129,12 +129,34 @@
 
     </div>
 
+    <!-- ZAWODY -->
+    <div class="tile">
+        <h3>Krok 4. Wybór zawodów</h3>
+
+        <div class="tile-grid">
+            <div>
+                <h6>Wybierz zawody, na które zespół zostanie zapisany</h6>
+
+                <div class="form-grid">
+                    {% for field in competition %}
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if competition_error %}
+                            <h6 class="form-grid-error">{{ competition_error }}</h6>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
     <!-- REJESTRACJA UZUPELNIAJĄCA -->
     <div class="tile">
-        <h3>Krok 4. Kod autoryzacyjny, dane opiekuna oraz priorytet (tylko dla szkół średnich)</h3>
+        <h3>Krok 5 (tylko dla szkół średnich). Kod autoryzacyjny, dane opiekuna oraz priorytet</h3>
 
         {% if need_compliment %}
-            <h4 style="color: red">Dla wybranej placówki edukacyjnej wymagane są dane uzupełniające</h4>
+            <h4 class="form-grid-error">Dla wybranej placówki edukacyjnej wymagane są dane uzupełniające</h4>
         {% endif %}
 
         <div class="tile-grid">
@@ -145,7 +167,7 @@
                     {% for field in compliment %}
                         {{ field.label_tag }}
                         {{ field }}
-                        {% if field.errors %}
+                        {% if need_compliment and field.errors %}
                             {% for error in field.errors %}
                                 <h6 class="form-grid-error">{{ error }}</h6>
                             {% endfor %}

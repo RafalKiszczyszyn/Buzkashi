@@ -23,8 +23,8 @@
 {% block content %}
 
 <div style="float: right">
-    <a href="{% url 'solution_results' solution_id=1 %}" class="button-secondary">Wyniki testów</a>
-    <a href="{% url 'solution_code' solution_id=1 %}" class="button-secondary button-secondary-active-black">Kod źródłowy</a>
+    <a href="{% url 'solution_results' solution_id=solution.id %}" class="button-secondary">Wyniki testów</a>
+    <a href="{% url 'solution_code' solution_id=solution.id %}" class="button-secondary button-secondary-active-black">Kod źródłowy</a>
 </div>
 
 <div class="title">
@@ -46,9 +46,9 @@
          </div>
 
         <div class="tile-buttons">
-            <a href="#"><span>Zaakceptuj</span></a>
-            <a href="#"><span>Odrzuć</span></a>
-            <a href="#"><span>Dyskwalifikuj</span></a>
+            <a href="{% url 'solution_judgement' solution_id=solution.id decision='accept' %}"><span>Zaakceptuj</span></a>
+            <a href="{% url 'solution_judgement' solution_id=solution.id decision='reject' %}"><span>Odrzuć</span></a>
+            <a href="{% url 'solution_judgement' solution_id=solution.id decision='disqualify' %}"><span>Dyskwalifikuj</span></a>
         </div>
 
 

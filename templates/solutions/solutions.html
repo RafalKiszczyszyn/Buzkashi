@@ -18,7 +18,7 @@
 <div class="title">Rozwiązania</div>
 
 <div class="tile">
-    <h3>{{ competition_name|default:'Brak odbywających się zawodów' }}</h3>
+    <h3>{{ competition_title|default:'Brak odbywających się zawodów' }}</h3>
     <table class="table table-fixed">
         <thead>
             <tr>
@@ -33,7 +33,7 @@
             <tr>
                 <td>{{ forloop.counter }}.</td>
                 <td>{{ solution.author.name }}</td>
-                <td>46 min</td>
+                <td>{{ solution.submission_time_in_minutes }} min</td>
                 <td><a class="light-link" href="{% url 'solution_results' solution_id=solution.id %}">Szczegóły</a></td>
             </tr>
             {% empty %}

@@ -1,7 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import path
-from .views import home_view, rank_view,  SolutionResultsView, SolutionCodeView, SolutionsView, \
-    RegistrationView, TaskCreateView, TaskEditView, TasksView, comps_view
+from .views import home_view, rank_view, SolutionResultsView, SolutionCodeView, SolutionsView, \
+    RegistrationView, TaskCreateView, TaskEditView, TasksView, comps_view, SolutionJudgementView
 
 urlpatterns = [
 
@@ -11,9 +11,11 @@ urlpatterns = [
     path('tasks/<int:task_id>', login_required(TaskEditView.as_view()), name='task_edit'),
     path('tasks/create/', login_required(TaskCreateView.as_view()), name='task_create'),
     path('rank/', rank_view, name='rank'),
-    path('solutions/', SolutionsView.as_view(), name='solutions'),
-    path('solutions/results/<int:solution_id>', SolutionResultsView.as_view(), name='solution_results'),
-    path('solutions/code/<int:solution_id>', SolutionCodeView.as_view(), name='solution_code'),
+    path('solutions/', login_required(SolutionsView.as_view()), name='solutions'),
+    path('solutions/results/<int:solution_id>', login_required(SolutionResultsView.as_view()), name='solution_results'),
+    path('solutions/code/<int:solution_id>', login_required(SolutionCodeView.as_view()), name='solution_code'),
+    path('solutions/judgment/<int:solution_id>,<str:decision>', login_required(SolutionJudgementView.as_view()),
+         name='solution_judgement'),
     path('registration', RegistrationView.as_view(), name='registration'),
 
 ]

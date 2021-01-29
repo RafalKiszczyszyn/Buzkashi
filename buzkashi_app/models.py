@@ -1,3 +1,5 @@
+import math
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
@@ -55,6 +57,21 @@ class Competition(models.Model):
 
         query_set = Competition.objects.filter(start_date__gte=search_from)
         return query_set
+
+    @classmethod
+    def get_current_competition(cls):
+        now = timezone.now()
+        cur_date = datetime(year=now.year, month=now.month, day=now.day, tzinfo=now.tzinfo)
+
+        try:
+            competition = Competition.objects.get(start_date__range=(cur_date, cur_date + timedelta(days=1)))
+        except Competition.DoesNotExist:
+            return None
+
+        if competition.start_date <= now <= competition.start_date + competition.duration:
+            return competition
+
+        return None
 
 
 class EduInstitution(models.Model):
@@ -239,6 +256,10 @@ class Solution(models.Model):
     submission_time = models.DateTimeField(default=timezone.now)
 
     # TODO: ocena wyliczana po zaakceptowaniu, uwzględnia czas złożenia i wersję
+
+    @property
+    def submission_time_in_minutes(self):
+        return math.floor((self.submission_time - self.author.competition.start_date).seconds / 60)
 
 
 class AutomatedTest(models.Model):
