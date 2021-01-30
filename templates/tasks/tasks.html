@@ -5,34 +5,38 @@
 <div id="tasks__title" class="title">Zadania</div>
 
 {% for task in tasks %}
-<div id="tasks__tile" class="tile">
+<div id="tasks__tile-{{ task.id }}" class="tile">
     <div class="tile-grid">
         <div class="tile-content">
-            <h3 id="tasks__tile__task-title">{{ task.title }}</h3>
-            {% if task.competition != None %}
-            {% if task.competition.session == 1 %}
-            <h5 id="tasks__tile__task-session-uni">Sesja dla studentów</h5>
-            {% elif task.competition.session == 2 %}
-            <h5 id="tasks__tile__task-session-school">Sesja dla szkół</h5>
-            {% endif %}
-            <h6 id="tasks__tile__task-competition-titile">{{ task.competition.title }}</h6>
-            {% endif %}
-            <article id="tasks__tile__task-body">{{ task.body|linebreaks }}</article>
+            <h3 id="tasks__tile__task-title-{{ task.id }}">{{ task.title }}</h3>
+            <div id="tasks__tile__session-{{ task.id }}">
+                {% if task.competition != None %}
+                {% if task.competition.session == 1 %}
+                <h5>Sesja dla studentów</h5>
+
+                {% elif task.competition.session == 2 %}
+                <h5>Sesja dla szkół</h5>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <h6 id="tasks__tile__competition-title-{{ task.id }}">{{ task.competition.title }}</h6>
+            <article id="tasks__tile__task-body-{{ task.id }}">{{ task.body|linebreaks }}</article>
         </div>
-        <div id="tasks__tile__task-buttons" class="tile-buttons">
+        <div id="tasks__tile__task-buttons-{{ task.id }}" class="tile-buttons">
             <a href="{% url 'task_edit' task_id=task.id %}">
-                <span id="tasks__tile__task-buttons__edit">Edytuj zadanie</span>
+                <span id="tasks__tile__task-buttons__edit-{{ task.id }}">Edytuj zadanie</span>
             </a>
             <a href="#">
-                <span id="tasks__tile__task-buttons__tests">Dodaj testy akceptacyjne</span>
+                <span id="tasks__tile__task-buttons__tests-{{ task.id }}">Dodaj testy akceptacyjne</span>
             </a>
-            <input id="tasks__tile__task-buttons__competition" type="button" data-toggle="modal"
-                   data-target="#exampleModal" data-whatever="{{ task.id }}" value="Dodaj do zawodów"/>
+            <input id="tasks__tile__task-buttons__competition-{{ task.id }}" type="button" data-toggle="modal"
+                   data-target="#exampleModal" data-taskid="{{ task.id }}"
+                   data-tasktitle="{{ task.title }}" value="Dodaj do zawodów"/>
         </div>
     </div>
+    {% include 'tasks/modal.html' %}
 </div>
-
-{% include 'tasks/modal.html' %}
 
 {% endfor %}
 

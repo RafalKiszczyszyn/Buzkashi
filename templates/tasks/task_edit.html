@@ -5,21 +5,24 @@
 {% block content %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/tile-h.css' %}"/>
 
-<div id="task-edit__title" class="title">Zadania</div>
+<div id="task-edit__title" class="title">Edycja zadania</div>
 
 <div id="task-edit__tile" class="tile">
     <form id="task-edit__form" method="POST"> {% csrf_token %}
         <div class="tile-grid">
             <div class="tile-content">
                 {{ form.title }}
-                {% if task.competition != None %}
-                {% if task.competition.session == 1 %}
-                <h5>Sesja dla studentów</h5>
-                {% elif task.competition.session == 2 %}
-                <h5>Sesja dla szkół</h5>
-                {% endif %}
-                <h6>{{ task.competition.title }}</h6>
-                {% endif %}
+                <div id="task-edit__comp-session">
+                    {% if task.competition != None %}
+                    {% if task.competition.session == 1 %}
+                    <h5>Sesja dla studentów</h5>
+                    {% elif task.competition.session == 2 %}
+                    <h5>Sesja dla szkół</h5>
+                    {% endif %}
+                    {% endif %}
+                </div>
+                <h6 id="task-edit__comp-title">{{ task.competition.title }}</h6>
+
             </div>
             <div class="tile-content-2">
                 {{ form.body }}
@@ -28,8 +31,8 @@
             {{form.author}}
 
             <div class="tile-buttons">
-                <a href="{% url 'tasks' %}"><span>Anuluj</span></a>
-                <input type="submit" value="Zapisz zmiany"/>
+                <a href="{% url 'tasks' %}"><span id="task-edit__cancel">Anuluj</span></a>
+                <input id="task-edit__submit" type="submit" value="Zapisz zmiany"/>
             </div>
         </div>
     </form>

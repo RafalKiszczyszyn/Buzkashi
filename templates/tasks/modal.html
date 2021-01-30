@@ -4,8 +4,8 @@
         <div class="tile">
             <form action="." method="POST"> {% csrf_token %}
                 <div class="tile-grid">
-                    <div class="tile-content">
-                        <h3>{{ task.title }}</h3>
+                    <div id="modal_tile-content" class="tile-content">
+                        <h3 id="modal__task-title" class="task-title">Tytuł zadania</h3>
                         <h6>Wybierz zawody, do których chcesz podpiąć zadanie</h6>
 
                         <input type="hidden" name="input-task-id"/>
@@ -13,11 +13,12 @@
                             {% for comp in competitions %}
                             <option value="{{ comp.id }}">{{ comp.title }}</option>
                             {% endfor %}
+                            <option value="0">---------</option>
                         </select>
                     </div>
                     <div class="tile-buttons">
                         <input type="button" data-dismiss="modal" value="Anuluj"/>
-                        <input type="submit" value="Zapisz"/>
+                        <input id="modal__tile-buttons__submit" type="submit" value="Zapisz"/>
                     </div>
                 </div>
             </form>
@@ -29,8 +30,10 @@
 <script>
     $('#exampleModal').on('show.bs.modal', function (event) {
         const button = $(event.relatedTarget)
-        const task_id = button.data('whatever')
+        const task_id = button.data('taskid')
+        const task_title = button.data('tasktitle')
         const modal = $(this)
         modal.find('.tile-content input[name="input-task-id"]').val(task_id)
+        modal.find('.tile-content h3').text(task_title)
     })
 </script>

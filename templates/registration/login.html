@@ -7,13 +7,13 @@
 <div class="tile">
     <form method="POST"> {% csrf_token %}
         <div class="tile-grid">
-            <div class="tile-content">
-                <h3>Login</h3>
+            <div id="login-inputs" class="tile-content">
+                <h3 id="login-inputs__title">Login</h3>
                 {% for input in form %}
                 <h6>{{ input.label }} {{ input }}</h6>
                 {% endfor %}
             </div>
-            <div class="tile-buttons">
+            <div id="login-buttons" class="tile-buttons">
                 <input id="submit-button" type="submit" value="Login"/>
             </div>
         </div>

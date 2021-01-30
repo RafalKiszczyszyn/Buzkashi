@@ -31,6 +31,7 @@ class TasksView(View):
         logged_judge = get_object_or_404(Judge, user=request.user)
         self.context['tasks'] = Task.objects.filter(author=logged_judge)
         self.context['competitions'] = Competition.objects.all()
+        # TODO: pobieranie tylko przyszłych zawodów
 
         return render(request, self.template_name, self.context)
 
@@ -39,7 +40,11 @@ class TasksView(View):
         competition_id = int(request.POST.get('select-comp'))
 
         updated_task = get_object_or_404(Task, id=task_id)
-        competition = get_object_or_404(Competition, id=competition_id)
+
+        if competition_id != 0:
+            competition = get_object_or_404(Competition, id=competition_id)
+        else:
+            competition = None
 
         updated_task.competition = competition
         updated_task.save()

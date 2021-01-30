@@ -7,7 +7,7 @@ urlpatterns = [
 
     path('', home_view, name='home'),
     path('comps/', comps_view, name='comps'),
-    path('tasks/', login_required(TasksView.as_view()), name='tasks'),
+    path('tasks/', login_required(TasksView.as_view(), login_url='login'), name='tasks'),
     path('tasks/<int:task_id>', login_required(TaskEditView.as_view()), name='task_edit'),
     path('tasks/create/', login_required(TaskCreateView.as_view()), name='task_create'),
     path('rank/', rank_view, name='rank'),
