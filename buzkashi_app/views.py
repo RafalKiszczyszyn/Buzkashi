@@ -209,7 +209,7 @@ class SolutionJudgementView(View):
 
         if decision == 'accept':
             solution.status = Solution.SolutionStatus.ACCEPTED
-            solution.author.score += timedelta(minutes=solution.submission_time_in_minutes+(solution.version - 1 * 20))
+            solution.author.score += solution.score
         elif decision == 'reject':
             solution.status = Solution.SolutionStatus.REJECTED
         elif decision == 'disqualify':

@@ -39,10 +39,10 @@ class Competition(models.Model):
     duration = models.DurationField(help_text='HH:MM:ss format', default=timedelta(hours=3))
 
     # maksymalna liczba zespołów: INTEGER, NOT NULL, DEFAULT=50
-    max_teams = models.IntegerField(verbose_name='Max Number Of Teams', default=50)
+    max_teams = models.IntegerField(default=50)
 
     # czy zawody testowe: BIT, NOT NULL
-    is_test = models.BooleanField()
+    is_test = models.BooleanField(default=False)
 
     # opis: VARCHAR(2000)
     description = models.CharField(max_length=2000, blank=True, null=True)
@@ -95,7 +95,6 @@ class EduInstitution(models.Model):
 
     # wojewodztwo: VARCHAR(50), NOT NULL
     region = models.CharField(max_length=50)
-    # TODO: enumerator?
 
     # email: VARCHAR(50), NOT NULL, UNIQUE
     email = models.EmailField(unique=True)
@@ -123,8 +122,8 @@ class Team(models.Model):
     # data zgłoszenia: TIMESTAMP, NOT NULL, DEFAULT=NOW
     application_date = models.DateTimeField(default=timezone.now)
 
-    # priorytet: INTEGER, NOT NULL, DEFAULT=0
-    priority = models.IntegerField(default=0)
+    # priorytet: INTEGER, NOT NULL, DEFAULT=1
+    priority = models.IntegerField(default=1)
 
     # czy zakwalifikowany: BIT, NOT NULL
     is_qualified = models.BooleanField(default=False)
@@ -136,7 +135,6 @@ class Team(models.Model):
     tutor = models.CharField(max_length=255, blank=True, null=True)
 
     # powiązane konto
-    # null=True?
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     # zawody: FOREIGN KEY(Competition)
@@ -145,8 +143,6 @@ class Team(models.Model):
 
     # placówka edukacyjna: FOREIGN KEY(EduInstitute)
     institution = models.ForeignKey(EduInstitution, on_delete=models.PROTECT)
-
-    # TODO: tutaj powinien być klucz obcy do rankingu, ale nie wiadomo czy będzię on przechowywany w bazie
 
 
 class Participant(models.Model):
@@ -166,7 +162,6 @@ class Participant(models.Model):
 
     # czy kapitan: BIT, NOT NULL
     is_capitan = models.BooleanField(default=False)
-    # TODO: ograniczenie w zespole: tylko jeden uczestnik moze byc kapitanem
 
     # zespół: FOREIGN KEY(Team)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
@@ -175,7 +170,6 @@ class Participant(models.Model):
 class Judge(models.Model):
     """
     Klasa ORM sędziego
-    id generowane automatycznie
     z modelem sędziego powiązane jest konto użytkownika
     """
 
@@ -183,7 +177,7 @@ class Judge(models.Model):
     is_chief = models.BooleanField(default=False)
 
     # powiązane konto
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
 
 class Task(models.Model):
@@ -251,7 +245,7 @@ class Solution(models.Model):
     author = models.ForeignKey(Team, on_delete=models.CASCADE)
 
     # sędzia: FOREIGN KEY(Judge)
-    judge = models.ForeignKey(Judge, on_delete=models.CASCADE, default=None)
+    judge = models.ForeignKey(Judge, on_delete=models.CASCADE)
 
     # zadanie: FOREIGN KEY(Task)
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
@@ -265,11 +259,13 @@ class Solution(models.Model):
     # czas złożenia: TIMESTAMP, NOT NULL, DEFAULT=NOW
     submission_time = models.DateTimeField(default=timezone.now)
 
-    # TODO: ocena wyliczana po zaakceptowaniu, uwzględnia czas złożenia i wersję
-
     @property
     def submission_time_in_minutes(self):
         return math.floor((self.submission_time - self.author.competition.start_date).seconds / 60)
+
+    @property
+    def score(self):
+        return timedelta(minutes=self.submission_time_in_minutes + (self.version - 1) * 20)
 
 
 class AutomatedTest(models.Model):
@@ -279,12 +275,12 @@ class AutomatedTest(models.Model):
     """
 
     # tytuł: VARCHAR(255), NOT NULL
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, null=True, blank=True)
 
-    # dane wejsciowe: FILE ?, NOT NULL TODO: jaka ścieżka zapisu?
-    input = models.FileField(upload_to='uploads/tests')
+    # dane wejsciowe: FILE
+    input = models.FileField(upload_to='uploads/tests', null=True, blank=True)
 
-    # oczekiwane dane wyjsciowe: FILE ?, NOT NULL
+    # oczekiwane dane wyjsciowe: FILE, NOT NULL
     expected_output = models.FileField(upload_to='uploads/tests')
 
     # max czas wykonywania: ???, NOT NULL,
@@ -326,13 +322,13 @@ class AutomatedTestResult(models.Model):
     status = models.TextField(choices=TestStatus.choices, default=TestStatus.FAILED)
 
     # czas wykonywania: ???, NOT NULL
-    runtime = models.DurationField(default=None)
+    runtime = models.DurationField()
 
     # test: FOREIGN KEY(AutomatedTest)
-    test = models.ForeignKey(AutomatedTest, on_delete=models.CASCADE, default=None)
+    test = models.ForeignKey(AutomatedTest, on_delete=models.CASCADE)
 
     # rozwiazanie: FOREIGN KEY(Solution)
-    solution = models.ForeignKey(Solution, on_delete=models.CASCADE, default=None)
+    solution = models.ForeignKey(Solution, on_delete=models.CASCADE)
 
 
 class Notice(models.Model):
