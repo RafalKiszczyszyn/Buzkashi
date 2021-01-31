@@ -1,4 +1,7 @@
+import csv
 from datetime import timedelta
+from io import StringIO
+
 from django.http import HttpResponse
 from django.views.generic import CreateView, UpdateView
 from django.shortcuts import render, redirect, get_object_or_404
@@ -30,8 +33,7 @@ class TasksView(View):
     def get(self, request):
         logged_judge = get_object_or_404(Judge, user=request.user)
         self.context['tasks'] = Task.objects.filter(author=logged_judge)
-        self.context['competitions'] = Competition.objects.all()
-        # TODO: pobieranie tylko przyszłych zawodów
+        self.context['competitions'] = Competition.get_coming_competitions()
 
         return render(request, self.template_name, self.context)
 
@@ -80,10 +82,35 @@ class TaskCreateView(CreateView):
         return super().form_valid(form)
 
 
-def rank_view(request, *args, **kwargs):
-    teams = Team.objects.all()
-    context = {'teams': teams}
-    return render(request, "rank.html", context)
+class RankView(View):
+    template_name = 'rank/rank.html'
+    success_url = '/rank'
+
+    def __init__(self):
+        super(RankView, self).__init__()
+        self.context = {}
+
+    def get(self, request):
+        competition = Competition.get_current_competition()
+
+        if competition:
+            end_date = competition.start_date + competition.duration - timedelta(hours=1)
+            self.context['end_date'] = int(end_date.timestamp() * 1000)
+
+            self.context['competition'] = competition
+            rank = competition.rank.read().decode('utf-8')
+            rank_frozen = competition.rank_frozen.read().decode('utf-8')
+
+            if request.user.is_authenticated:
+                self.context['rank'] = csv.reader(StringIO(rank), delimiter=',')
+                self.context['rank_frozen'] = csv.reader(StringIO(rank_frozen), delimiter=',')
+            else:
+                if competition.is_frozen:
+                    self.context['rank_frozen'] = csv.reader(StringIO(rank_frozen), delimiter=',')
+                else:
+                    self.context['rank'] = csv.reader(StringIO(rank), delimiter=',')
+
+        return render(request, self.template_name, self.context)
 
 
 class SolutionsView(View):

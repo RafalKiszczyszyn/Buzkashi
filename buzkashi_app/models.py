@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 
 # Create your models here.
 
@@ -47,7 +47,14 @@ class Competition(models.Model):
     # opis: VARCHAR(2000)
     description = models.CharField(max_length=2000, blank=True, null=True)
 
-    # TODO: tutaj powinny być klucze obce do rankingu, ale nie wiadomo czy będzię on przechowywany w bazie
+    # ranking: FILE SAVED IN DIRECTORY NOT DATABASE!
+    rank = models.FileField(upload_to='uploads/ranks')
+
+    # ranking zamrożony: FILE SAVED IN DIRECTORY NOT DATABASE!
+    rank_frozen = models.FileField(upload_to='uploads/ranks')
+
+    # czy zamrożony: BIT, NOT NULL
+    is_frozen = models.BooleanField(default=False)
 
     @classmethod
     def get_coming_competitions(cls):
@@ -277,7 +284,7 @@ class AutomatedTest(models.Model):
     # oczekiwane dane wyjsciowe: FILE ?, NOT NULL
     expected_output = models.FileField(upload_to='uploads/tests')
 
-    # max czas wykonywania: ???, NOT NULL, TODO: DEFAULT?
+    # max czas wykonywania: ???, NOT NULL,
     max_time = models.DurationField(default=timedelta(seconds=1))
 
     # zadanie: FOREIGN KEY(Task)

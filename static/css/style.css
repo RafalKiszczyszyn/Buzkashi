@@ -95,6 +95,7 @@ main {
 }
 
 .sidebar span {
+    display: none;
     position: absolute;
     left: 80px;
     opacity: 0;
@@ -134,6 +135,7 @@ label #btn-sidebar:hover {
 }
 
 #check:checked ~ .sidebar a span {
+    display: inline;
     opacity: 1;
     transition: 0.3s;
 }

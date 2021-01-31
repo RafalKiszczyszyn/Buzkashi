@@ -1,0 +1,77 @@
+{% extends 'base/base.html' %}
+
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/tile-r.css' %}"/>
+
+{% if competition %}
+<div class="time">Czas pozostały do końca zawodów: <span id="rank__time" onload="showTime()"></span></div>
+<div class="title">{{ competition.title }}</div>
+
+<div class="ranks">
+
+    {% if rank %}
+    <div class="tile">
+        <h3>Ranking aktualny</h3>
+        <div class="tile-grid">
+            <h5>Pozycja</h5>
+            <h5>Nazwa zespołu</h5>
+            <h5>Zadania rozwiązane</h5>
+            <h5>Czas</h5>
+
+            {% for row in rank %}
+            <p>{{ row.0 }}</p>
+            <p>{{ row.1 }}</p>
+            <p>{{ row.2 }}</p>
+            <p>{{ row.3 }}</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if rank_frozen %}
+    <div class="tile">
+        <h3>Ranking zamrożony</h3>
+        <div class="tile-grid">
+            <h5>Pozycja</h5>
+            <h5>Nazwa zespołu</h5>
+            <h5>Zadania rozwiązane</h5>
+            <h5>Czas</h5>
+
+            {% for row in rank_frozen %}
+            <p>{{ row.0 }}</p>
+            <p>{{ row.1 }}</p>
+            <p>{{ row.2 }}</p>
+            <p>{{ row.3 }}</p>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% else %}
+<div class="title">Ranking</div>
+<div class="rank__no-comp">Ranking będzie dostępny po rozpoczęciu zawodów</div>
+{% endif %}
+
+<script>
+    function showTime() {
+        let end_date = "{{ end_date }}";
+        let current_date = Date.now();
+        let time_left = new Date(end_date - current_date);
+
+        let h = time_left.getHours();
+        let m = time_left.getMinutes();
+        let s = time_left.getSeconds();
+
+        h = (h < 10) ? "0" + h : h;
+        m = (m < 10) ? "0" + m : m;
+        s = (s < 10) ? "0" + s : s;
+
+        document.getElementById("rank__time").innerText = h + ":" + m + ":" + s;
+        setTimeout(showTime, 1000);
+    }
+    showTime();
+</script>
+{% endblock %}

@@ -1,10 +1,12 @@
 .ranks {
+    margin: auto;
     display: flex;
     justify-content: space-between;
+    gap: 25px;
 }
 
 .tile {
-    width: 45%;
+    flex-grow: 1;
 }
 
 .tile h3 {
@@ -29,6 +31,13 @@
 
 .tile-grid h5 {
     margin: 5px 0 5px 0;
+}
+
+.rank__no-comp {
+    margin-top: 15%;
+    text-align: center;
+    font-weight: 250;
+    color: #888888;
 }
 
 p {
