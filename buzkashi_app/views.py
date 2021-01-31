@@ -2,15 +2,19 @@ import csv
 from datetime import timedelta
 from io import StringIO
 
+
+from django import forms
 from django.http import HttpResponse
 from django.views.generic import CreateView, UpdateView
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.views import View
-from django.forms import formset_factory
+from django.forms import modelformset_factory
 from django.db import transaction
 from .forms import TeamForm, EduInstitutionSelectForm, RegistrationComplimentForm, ParticipantForm, TaskEditForm, \
     CompetitionSelectForm
-from .models import Team, Task, Judge, Competition, Solution, AutomatedTest, AutomatedTestResult
+from .models import Team, Task, Judge, Competition, Solution, AutomatedTest, AutomatedTestResult, Participant
+from urllib.parse import urlencode
 
 
 def home_view(request):
@@ -220,11 +224,12 @@ class SolutionJudgementView(View):
 
 class RegistrationView(View):
     template_name = 'registration/registration.html'
-    ParticipantFormSet = formset_factory(ParticipantForm, extra=3)
+    ParticipantFormSet = modelformset_factory(model=Participant, form=ParticipantForm, extra=3)
 
     def __init__(self, *args, **kwargs):
         super(RegistrationView, self).__init__(*args, **kwargs)
         self.context = {}
+        self.redirect_context = {}
 
     def get(self, request):
         formset = self.ParticipantFormSet()
@@ -240,8 +245,8 @@ class RegistrationView(View):
         compliment_form = RegistrationComplimentForm(request.POST)
 
         if self.__is_valid(participant_formset, team_form, institution_form, competition_form, compliment_form):
-            self.__save_models(participant_formset, team_form, institution_form, compliment_form, compliment_form)
-            return redirect('home')
+            self.__save_models(participant_formset, team_form, institution_form, competition_form, compliment_form)
+            return redirect(f"{reverse('registration_success')}?{urlencode(self.redirect_context)}")
 
         self.__load_forms(participant_formset, team_form, institution_form, competition_form, compliment_form)
         return render(request, self.template_name, self.context)
@@ -269,7 +274,7 @@ class RegistrationView(View):
         if (competition.session != Competition.Session.UNIVERSITY_SESSION and institution.is_university)\
                 or (competition.session == Competition.Session.UNIVERSITY_SESSION and not institution.is_university):
             is_valid = False
-            self.context['competition_error'] = 'Wybierz odpowiednie zawody dla wybranej placówki edukacyjnej'
+            self.context['competition_error'] = 'Nieodpowiednie zawody dla wybranej placówki edukacyjnej'
 
         # jezeli wybrano szkołę średnią sprawdź poprawność danych uzupełniających
         if not institution.is_university:
@@ -281,8 +286,7 @@ class RegistrationView(View):
 
         return is_valid
 
-    @classmethod
-    def __save_models(cls, participant_formset, team_form, institution_form, competition_form, compliment_form):
+    def __save_models(self, participant_formset, team_form, institution_form, competition_form, compliment_form):
         team = team_form.save(commit=False)
         institution = institution_form.cleaned_data['institution']
         competition = competition_form.cleaned_data['competition']
@@ -295,17 +299,18 @@ class RegistrationView(View):
         team.institution = institution
         team.competition = competition
 
-        participants = []
-        for participant_form in participant_formset:
-            participant = participant_form.save(commit=False)
-            participant.team = team
-            participants.append(participant)
+        participants = participant_formset.save(commit=False)
         participants[0].is_capitan = True
+        #with transaction.atomic():
+        #    team.save()
+        #    for participant in participants:
+        #        participant.team = team
+        #        participant.save()
 
-        with transaction.atomic():
-            team.save()
-            for participant in participants:
-                participant.save()
+        self.redirect_context['team_name'] = team.name
+        self.redirect_context['competition_title'] = competition.title
+        self.redirect_context['competition_start_date'] = competition.start_date
+        self.redirect_context['captain_email'] = participants[0].email
 
         return True
 
@@ -323,3 +328,11 @@ class RegistrationView(View):
         self.context['institution'] = institution
         self.context['competition'] = competition
         self.context['compliment'] = compliment
+
+
+def registration_success_view(request):
+    context = {}
+    for key in request.GET:
+        print(type(request.GET[key]), request.GET[key])
+        context[key] = request.GET[key]
+    return render(request, 'registration/success.html', context)

@@ -36,7 +36,7 @@ class Competition(models.Model):
     start_date = models.DateTimeField(default=timezone.now)
 
     # czas trwania: ???, NOT NULL
-    duration = models.DurationField(help_text='HH:MM:ss format')
+    duration = models.DurationField(help_text='HH:MM:ss format', default=timedelta(hours=3))
 
     # maksymalna liczba zespołów: INTEGER, NOT NULL, DEFAULT=50
     max_teams = models.IntegerField(verbose_name='Max Number Of Teams', default=50)
@@ -48,21 +48,25 @@ class Competition(models.Model):
     description = models.CharField(max_length=2000, blank=True, null=True)
 
     # ranking: FILE SAVED IN DIRECTORY NOT DATABASE!
-    rank = models.FileField(upload_to='uploads/ranks')
+    rank = models.FileField(upload_to='uploads/ranks', blank=True, null=True)
 
     # ranking zamrożony: FILE SAVED IN DIRECTORY NOT DATABASE!
-    rank_frozen = models.FileField(upload_to='uploads/ranks')
+    rank_frozen = models.FileField(upload_to='uploads/ranks', blank=True, null=True)
 
     # czy zamrożony: BIT, NOT NULL
     is_frozen = models.BooleanField(default=False)
 
     @classmethod
-    def get_coming_competitions(cls):
+    def get_coming_competitions(cls, registration_open=False):
         now = timezone.now()
-        cur_date = datetime(year=now.year, month=now.month, day=now.day, tzinfo=now.tzinfo)
-        search_from = cur_date + timedelta(weeks=1)
 
-        query_set = Competition.objects.filter(start_date__gte=search_from)
+        if registration_open:
+            cur_date = datetime(year=now.year, month=now.month, day=now.day, tzinfo=now.tzinfo)
+            search_from = cur_date + timedelta(weeks=1, days=1)
+        else:
+            search_from = now
+
+        query_set = Competition.objects.filter(start_date__gt=search_from).order_by('start_date')
         return query_set
 
     @classmethod
@@ -70,15 +74,14 @@ class Competition(models.Model):
         now = timezone.now()
         cur_date = datetime(year=now.year, month=now.month, day=now.day, tzinfo=now.tzinfo)
 
-        try:
-            competition = Competition.objects.get(start_date__range=(cur_date, cur_date + timedelta(days=1)))
-        except Competition.DoesNotExist:
-            return None
+        competition_set = Competition.objects.filter(start_date__range=(cur_date, cur_date + timedelta(days=1)))
 
-        if competition.start_date <= now <= competition.start_date + competition.duration:
-            return competition
+        competition = None
+        for _competition in competition_set:
+            if _competition.start_date <= now <= _competition.start_date + _competition.duration:
+                competition = _competition
 
-        return None
+        return competition
 
 
 class EduInstitution(models.Model):

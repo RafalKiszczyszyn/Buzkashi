@@ -1,0 +1,27 @@
+{% extends 'base/base.html' %}
+
+{% block head %}
+
+<style>
+    h3 {
+        margin: 0 0 10px 0;
+        font-size: x-large;
+        font-weight: 400;
+    }
+
+    h4 {
+        margin: 0 0 10px 0;
+        font-size: large;
+        font-weight: 300;
+    }
+
+</style>
+
+{% endblock %}
+
+{% block content %}
+
+<h3>Zarejestrowano zespół {{ team_name }} na zawody {{ competition_title }}, które odbędą się {{ competition_start_date }}</h3>
+<h4>Login oraz hasło do konta zostaną wysłane na email kapitana <strong>{{ captain_email }}</strong> po zakwalifikowaniu zespołu</h4>
+
+{% endblock %}

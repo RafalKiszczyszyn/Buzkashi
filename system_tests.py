@@ -2,11 +2,19 @@ import datetime
 import time
 
 from django.contrib.auth import get_user_model
+import sys
+import time
+from contextlib import contextmanager
+from datetime import timedelta
+from urllib.parse import urljoin
+
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.utils import timezone
 from selenium import webdriver
 from seleniumlogin import force_login
-
-from buzkashi_app.models import Judge, Task, Competition
+from selenium.common import exceptions
+from selenium.webdriver.support.ui import Select
+from buzkashi_app.models import EduInstitution, Judge, Task, Competition, Team
 
 USERNAME = 'nowy_user'
 PASSWORD = 'zawody2k21'
@@ -230,3 +238,160 @@ class JudgeViewTest(StaticLiveServerTestCase):
         tasks_edited_task_body_element = \
             self.browser.find_element_by_id("tasks__tile__task-body-{}".format(task_object.id))
         self.assertIn(task_new_body, tasks_edited_task_body_element.get_attribute("innerHTML"))
+
+
+@contextmanager
+def suppress_stderr():
+    "Temporarly suppress writes to stderr"
+
+    class Null:
+        write = lambda *args: None
+
+    err, sys.stderr = sys.stderr, Null
+    try:
+        yield
+    finally:
+        sys.stderr = err
+
+
+def exception_to_none(func, *args, **kwargs):
+    try:
+        return func(*args, **kwargs)
+    except exceptions.NoSuchElementException:
+        return None
+
+
+class RegistrationViewTest(StaticLiveServerTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(RegistrationViewTest, cls).setUpClass()
+        cls.registration_url = urljoin(cls.live_server_url, '/registration')
+
+    def setUp(self):
+        institution1 = EduInstitution.objects.create(name='Szkoła średnia', region='Region', email='hs@example.com',
+                                                     authorization_code='TEST', is_university=False)
+        self.high_school_id = institution1.id
+
+        institution2 = EduInstitution.objects.create(name='Uczelnia wyższa', region='Region', email='uni@example.com')
+        self.university_id = institution2.id
+
+        competition1 = Competition.objects.create(title='Zawody A', session=Competition.Session.HIGH_SCHOOL_SESSION,
+                                                  start_date=timezone.now() + timedelta(weeks=2),
+                                                  duration=timedelta(hours=3),
+                                                  is_test=False)
+        self.high_school_comp_id = competition1.id
+
+        competition2 = Competition.objects.create(title='Zawody B',
+                                                  start_date=timezone.now() + timedelta(weeks=2, days=1),
+                                                  duration=timedelta(hours=3), is_test=False)
+        self.university_comp_id = competition2.id
+
+        Team.objects.create(name='Rockersi', competition=competition1, institution=institution1)
+
+        with suppress_stderr():
+            self.browser = webdriver.Edge('./static/msedgedriver.exe')
+            self.browser.implicitly_wait(3)
+
+    def tearDown(self) -> None:
+        with suppress_stderr():
+            self.browser.quit()
+
+    def init_inputs(self):
+        self.inputs = {
+            # participant1
+            'id_form-0-name': '',
+            'id_form-0-surname': '',
+            'id_form-0-email': '',
+            # participant2
+            'id_form-1-name': '',
+            'id_form-1-surname': '',
+            'id_form-1-email': '',
+            # participant3
+            'id_form-2-name': '',
+            'id_form-2-surname': '',
+            'id_form-2-email': '',
+            # team
+            'id_name': '',
+            # compliment
+            'id_authorization_code': '',
+            'id_tutor_name': '',
+            'id_tutor_surname': '',
+            'id_priority': ''
+        }
+
+    def populate_participants_with_default(self):
+        self.inputs['id_form-0-name'] = 'Rafał'
+        self.inputs['id_form-0-surname'] = 'Kiszczyszyn'
+        self.inputs['id_form-0-email'] = 'kiszczyszyn@gmail.com'
+
+        self.inputs['id_form-1-name'] = 'Kaja'
+        self.inputs['id_form-1-surname'] = 'Limisiewicz'
+        self.inputs['id_form-1-email'] = 'limisiewicz@gmail.com'
+
+        self.inputs['id_form-2-name'] = 'Marek'
+        self.inputs['id_form-2-surname'] = 'Testowy'
+        self.inputs['id_form-2-email'] = 'testowy@gmail.com'
+
+    def populate_inputs(self, **inputs):
+        for id in inputs:
+            self.browser.find_element_by_id(id).send_keys(inputs[id])
+
+    def select_institution(self, id_value):
+        select = Select(self.browser.find_element_by_id('id_institution'))
+        select.select_by_value(id_value)
+
+    def select_competition(self, id_value):
+        select = Select(self.browser.find_element_by_id('id_competition'))
+        select.select_by_value(id_value)
+
+    def test_navigate_to_registration(self):
+        self.browser.get(self.live_server_url)
+        self.browser.find_element_by_id('topbar-button-register').click()
+
+        self.assertEqual(self.browser.current_url, self.registration_url)
+
+    def test_submit_empty_forms(self):
+        self.browser.get(self.registration_url)
+        self.browser.find_element_by_id('submit').click()
+
+        self.assertEqual(self.browser.current_url, self.registration_url)
+
+    def test_invalid_emails(self):
+        self.browser.get(self.registration_url)
+
+        self.init_inputs()
+        self.populate_participants_with_default()
+        self.inputs['id_form-0-email'] = 'invalid1@email'
+        self.inputs['id_form-1-email'] = 'invalid2@email'
+        self.inputs['id_form-2-email'] = 'invalid3@email'
+        self.inputs['id_name'] = 'Unikalni'
+        self.populate_inputs(**self.inputs)
+
+        self.select_institution(str(self.university_id))
+        self.select_competition(str(self.university_comp_id))
+
+        self.browser.find_element_by_id('submit').click()
+
+        self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id('id_form-grid-0')
+                                               .find_element_by_class_name, 'form-grid-error'))
+        self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id('id_form-grid-1')
+                                               .find_element_by_class_name, 'form-grid-error'))
+        self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id('id_form-grid-2')
+                                               .find_element_by_class_name, 'form-grid-error'))
+
+    def test_non_unique_team_name(self):
+        self.browser.get(self.registration_url)
+
+        self.init_inputs()
+        self.populate_participants_with_default()
+        self.inputs['id_name'] = 'Rockersi'
+        self.populate_inputs(**self.inputs)
+
+        self.select_institution(str(self.university_id))
+        self.select_competition(str(self.university_comp_id))
+
+        self.browser.find_element_by_id('submit').click()
+
+        self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id('id_form-grid-3')
+                                               .find_element_by_class_name, 'form-grid-error'))

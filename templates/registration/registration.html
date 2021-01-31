@@ -24,9 +24,12 @@
                 <h4>Kapitan</h4>
                 <h6>Na adres e-mail kapitana Zostaną wysłane dane logowania zespołu</h6>
 
-                <div class="form-grid">
+                <div id="id_form-grid-0" class="form-grid">
                     {% for field in captain %}
-                        {{ field.label_tag }}
+                        {% if field != captain.id %}
+                            {{ field.label_tag }}
+                        {% endif %}
+
                         {{ field }}
                         {% if field.errors %}
                             {% for error in field.errors %}
@@ -43,9 +46,12 @@
                 <h4>Zawodnik</h4>
                 <h6>Drugi zawodnik w zespole</h6>
 
-                <div class="form-grid">
+                <div id="id_form-grid-1" class="form-grid">
                     {% for field in participant1 %}
-                        {{ field.label_tag }}
+                        {% if field != participant1.id %}
+                            {{ field.label_tag }}
+                        {% endif %}
+
                         {{ field }}
                         {% if field.errors %}
                             {% for error in field.errors %}
@@ -63,9 +69,11 @@
                 <h4>Zawodnik</h4>
                 <h6>Trzeci zawodnik w zespole</h6>
 
-                <div class="form-grid">
+                <div id="id_form-grid-2" class="form-grid">
                     {% for field in participant2 %}
-                        {{ field.label_tag }}
+                        {% if field != participant2.id %}
+                            {{ field.label_tag }}
+                        {% endif %}
                         {{ field }}
                         {% if field.errors %}
                             {% for error in field.errors %}
@@ -85,7 +93,7 @@
     <div class="tile">
         <h3>Krok 2. Nazwa zespołu</h3>
 
-        <div class="tile-grid">
+        <div id="id_form-grid-3" class="tile-grid">
             <div>
                 <h6>Nadaj unikalną nazwę zespołowi</h6>
 
@@ -180,7 +188,7 @@
     </div>
 
     <!-- SUBMIT -->
-    <input class="tile-submit" type="submit" value="Zarejestruj zespół">
+    <input id='submit' class="tile-submit" type="submit" value="Zarejestruj zespół">
 
 </form>
 {% endblock %}

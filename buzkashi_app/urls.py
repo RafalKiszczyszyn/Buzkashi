@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.urls import path
-from .views import home_view, SolutionResultsView, SolutionCodeView, SolutionsView, \
-    RegistrationView, TaskCreateView, TaskEditView, TasksView, comps_view, SolutionJudgementView, RankView
+from .views import home_view, RankView, SolutionResultsView, SolutionCodeView, SolutionsView, \
+    RegistrationView, TaskCreateView, TaskEditView, TasksView, comps_view, SolutionJudgementView, \
+    registration_success_view
 
 urlpatterns = [
 
@@ -17,5 +18,6 @@ urlpatterns = [
     path('solutions/judgment/<int:solution_id>,<str:decision>', login_required(SolutionJudgementView.as_view()),
          name='solution_judgement'),
     path('registration', RegistrationView.as_view(), name='registration'),
+    path('registration/success', registration_success_view, name='registration_success')
 
 ]

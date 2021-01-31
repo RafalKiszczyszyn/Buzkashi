@@ -21,6 +21,10 @@ class ParticipantForm(forms.ModelForm):
             'email': 'E-mail'
         }
 
+        error_messages = {
+            'email': {'invalid': 'Niepoprawny email'}
+        }
+
 
 class TeamForm(forms.ModelForm):
     """
@@ -71,7 +75,8 @@ class CompetitionSelectForm(forms.Form):
                    f'{"uczelnie wyższe" if obj.session == models.Competition.Session.UNIVERSITY_SESSION else "szkoły średnie"}, ' \
                    f'{obj.start_date}'
 
-    competition = CompetitionChoiceField(label='Zawody', queryset=models.Competition.get_coming_competitions())
+    competition = CompetitionChoiceField(label='Zawody',
+                                         queryset=models.Competition.get_coming_competitions(registration_open=True))
 
 
 class RegistrationComplimentForm(forms.Form):
@@ -94,16 +99,24 @@ class RegistrationComplimentForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super(RegistrationComplimentForm, self).__init__(*args, **kwargs)
+        self.required = False
         self.valid_auth_code = None
 
     def set_valid_auth_code(self, valid_auth_code):
         self.valid_auth_code = valid_auth_code
+        self.required = True
 
     def clean(self):
         cleaned_data = super().clean()
 
-        if self.valid_auth_code != cleaned_data['authorization_code']:
-            self.add_error('authorization_code', 'Niepoprawny kod')
+        if self.required:
+            fields = [field for field in cleaned_data.keys()]
+            for field in fields:
+                if not cleaned_data[field]:
+                    self.add_error(field, 'Pole nie może pozostać puste')
+
+            if 'authorization_code' in cleaned_data and self.valid_auth_code != cleaned_data['authorization_code']:
+                self.add_error('authorization_code', 'Niepoprawny kod')
 
 
 class TaskEditForm(forms.ModelForm):
