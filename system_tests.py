@@ -1,9 +1,8 @@
 import datetime
 import time
+import sys
 
 from django.contrib.auth import get_user_model
-import sys
-import time
 from contextlib import contextmanager
 from datetime import timedelta
 from urllib.parse import urljoin
@@ -11,6 +10,7 @@ from urllib.parse import urljoin
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.utils import timezone
 from selenium import webdriver
+
 try:
     from seleniumlogin import force_login
 except ImportError:
@@ -19,26 +19,23 @@ from selenium.common import exceptions
 from selenium.webdriver.support.ui import Select
 from buzkashi_app.models import EduInstitution, Judge, Task, Competition, Team
 
-USERNAME = 'nowy_user'
-PASSWORD = 'zawody2k21'
-
-
-def force_login_judge(browser, live_server):
-    user = get_user_model().objects.create(username=USERNAME, password=PASSWORD)
-    Judge.objects.create(user=user)
-
-    force_login(user, browser, live_server)
-    browser.get(live_server)
-
 
 class JudgeViewTest(StaticLiveServerTestCase):
 
     def setUp(self):
         self.browser = webdriver.Chrome('./static/chromedriver')
         self.browser.implicitly_wait(3)
+        self.tasks_url = urljoin(self.live_server_url, '/tasks/')
 
     def tearDown(self) -> None:
         self.browser.close()
+
+    def force_login_judge(self):
+        user = get_user_model().objects.create(username='nowy_user', password='zawody2k21')
+        Judge.objects.create(user=user)
+
+        force_login(user, self.browser, self.live_server_url)
+        self.browser.get(self.live_server_url)
 
     def check_tasks_page(self):
         page_title_element = self.browser.find_element_by_id("tasks__title")
@@ -131,7 +128,7 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertIn("Ranking", nav_menu)
         self.assertNotIn("Zadania", nav_menu)
 
-        self.browser.get('{}/tasks/'.format(self.live_server_url))
+        self.browser.get(self.tasks_url)
         tile_title_element = self.browser.find_element_by_id("login-inputs__title")
         login_inputs_element = self.browser.find_element_by_id("login-inputs")
         self.assertEqual("Login", tile_title_element.text)
@@ -139,8 +136,8 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertIn('<input type="password" name="password"', login_inputs_element.get_attribute("innerHTML"))
 
     def test_PT002(self):
-        force_login_judge(self.browser, self.live_server_url)
-        self.browser.get('{}/tasks/'.format(self.live_server_url))
+        self.force_login_judge()
+        self.browser.get(self.tasks_url)
 
         self.check_tasks_page()
         main_element = self.browser.find_element_by_tag_name("main")
@@ -181,11 +178,9 @@ class JudgeViewTest(StaticLiveServerTestCase):
         task_object = Task.objects.get(title=task_title)
         Competition.objects.create(
             title=task_new_comp_title,
-            duration=datetime.timedelta(seconds=10800),
-            is_test=False
+            start_date=datetime.datetime(2021, 3, 12, tzinfo=timezone.now().tzinfo)
         )
         self.browser.refresh()
-
         self.check_tasks_page()
         self.check_task_tile(task_title)
 
@@ -391,7 +386,6 @@ class RegistrationViewTest(StaticLiveServerTestCase):
         self.assertEqual(self.browser.current_url.split("?")[0], self.success_url)
 
     def test_PT012(self):
-
         pass
 
     def test_PT013(self):

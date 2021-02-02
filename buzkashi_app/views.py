@@ -28,7 +28,6 @@ def comps_view(request):
 class TasksView(View):
     template_name = 'tasks/tasks.html'
     success_url = '/tasks'
-    queryset = Task.objects.all()
 
     def __init__(self, *args, **kwargs):
         super(TasksView, self).__init__(*args, **kwargs)
