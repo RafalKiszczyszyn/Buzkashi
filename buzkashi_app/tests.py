@@ -38,7 +38,7 @@ def get_task_by_other_judge():
     return task
 
 
-class ViewsTest(TestCase):
+class TaskViewTest(TestCase):
 
     def setUp(self) -> None:
         create_user()
@@ -51,7 +51,7 @@ class ViewsTest(TestCase):
         self.assertNotEqual(response.status_code, 200)
 
 
-class ViewsTestJudge(TestCase):
+class TasksViewJudgeTest(TestCase):
 
     def setUp(self) -> None:
         self.judge = create_judge()
