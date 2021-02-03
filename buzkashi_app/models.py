@@ -187,7 +187,8 @@ class Task(models.Model):
     """
 
     # tytuł: VARCHAR(255), NOT NULL, UNIQUE
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True,
+                             error_messages={"unique": "Zadanie o tym tytule już istnieje"})
 
     # treść: VARCHAR(2000), NOT NULL
     body = models.TextField(max_length=2000)

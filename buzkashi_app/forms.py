@@ -132,4 +132,3 @@ class TaskEditForm(forms.ModelForm):
             'body': forms.Textarea(attrs={'class': 'input-text',
                                           'placeholder': 'Wprowadź treść zadania'}),
         }
-        # TODO: utworzyć ograniczenia min i max length
