@@ -2,7 +2,6 @@ import csv
 from datetime import timedelta
 from io import StringIO
 
-from django import forms
 from django.http import HttpResponse
 from django.views.generic import CreateView, UpdateView
 from django.shortcuts import render, redirect, get_object_or_404
@@ -25,6 +24,10 @@ def comps_view(request):
 
 
 class TasksView(View):
+    """
+    Klasa widoku dla zadań danego sędziego.
+    Dostęp do widoku wymaga zalogowania.
+    """
     template_name = 'tasks/tasks.html'
     success_url = '/tasks'
 
@@ -33,6 +36,13 @@ class TasksView(View):
         self.context = {}
 
     def get(self, request):
+        """
+        Przygotowuje dla template listę zadań przypisanych do sędziego oraz listę przyszłych zawodów,
+        do których można podpiąć zadania.
+        Jeżeli zalogowany użytkownik nie jest sędzią, zwraca odpowiedź HTTP o statusie 404.
+
+        :return: odpowiedź HTTP z templatem określonym w template_name i danymi zadań sędziego.
+        """
         logged_judge = get_object_or_404(Judge, user=request.user)
         self.context['tasks'] = Task.objects.filter(author=logged_judge)
         self.context['competitions'] = Competition.get_coming_competitions()
@@ -40,6 +50,12 @@ class TasksView(View):
         return render(request, self.template_name, self.context)
 
     def post(self, request):
+        """
+        Aktualizuje zadanie, do którego zostały podpięte zawody.
+        Jeżeli zadanie lub zawody nie istnieją, zwraca odpowiedź HTTP o statusie 404.
+
+        :return: odpowiedź HTTP z templatem określonym w template_name i zaktualizowanymi danymi zadań sędziego.
+        """
         task_id = int(request.POST.get('input-task-id'))
         competition_id = int(request.POST.get('select-comp'))
 
@@ -57,24 +73,42 @@ class TasksView(View):
 
 
 class TaskEditView(UpdateView):
+    """
+    Klasa widoku dla edycji zadania.
+    Dostęp do widoku wymaga zalogowania.
+    """
     template_name = 'tasks/task_edit.html'
     form_class = TaskEditForm
     success_url = '/tasks'
 
     def get_object(self, **kwargs):
+        """
+        Zwraca pojedynczy obiekt, którego dane zostaną wyświetlone.
+
+        :param kwargs: argumenty nazwane przekazane w URL, zmienna task_id określa id zadania.
+        :return: obiekt zadania o id przekazanym w URL.
+        """
         id_ = self.kwargs.get("task_id")
         return get_object_or_404(Task, id=id_)
 
-    def form_valid(self, form):
-        return super().form_valid(form)
-
 
 class TaskCreateView(CreateView):
+    """
+    Klasa widoku dla tworzenia zadania.
+    Dostęp do widoku wymaga zalogowania.
+    """
     template_name = 'tasks/task_edit.html'
     form_class = TaskEditForm
     success_url = '/tasks'
 
     def form_valid(self, form):
+        """
+        Tworzy model zadania. Przypisuje aktualnie zalogowanego sędziego jako autora zadania.
+        Zapisuje model.
+
+        :param form: formularz widoku określony w form_class.
+        :return: odpowiedź HTTP przekierowująca na success_url
+        """
         author = Judge.objects.get(user=self.request.user.id)
 
         obj = form.save(commit=False)
@@ -85,14 +119,25 @@ class TaskCreateView(CreateView):
 
 
 class RankView(View):
+    """
+    Klasa widoku rankingu.
+    """
     template_name = 'rank/rank.html'
-    success_url = '/rank'
 
     def __init__(self):
         super(RankView, self).__init__()
         self.context = {}
 
     def get(self, request):
+        """
+        Przygotowuje dla template czas zakończenia zawodów i tablicę rankingu dla aktualnie trwających zawodów.
+        Jeżeli aktualnie nie odbywają się zawody, przekazuje pustą tablicę danych.
+        Dane rankingów odczytuje z plików csv przypisanych zawodom.
+        Jeżeli użytkownik wyświetlający ranking jest sędzią, przekazuje dane rankingu aktualnego i zamrożonego.
+        W przeciwnym wypadku przekazuje dane jednego z nich, w zależności czy ranking jest zamrożony.
+
+        :return: odpowiedź HTTP z templatem określonym w template_name.
+        """
         competition = Competition.get_current_competition()
 
         if competition:
@@ -310,7 +355,7 @@ class RegistrationView(View):
         compliment_form = RegistrationComplimentForm(request.POST)
 
         if self.__is_valid(formset, team_form, institution_form, competition_form, compliment_form):
-            self.__save_models(formset.save(commit=False), team_form.save(commit=False),  compliment_form)
+            self.__save_models(formset.save(commit=False), team_form.save(commit=False), compliment_form)
             return redirect(f"{reverse('registration_success')}?{urlencode(self.redirect_context)}")
 
         self.__load_forms(formset, team_form, institution_form, competition_form, compliment_form)
@@ -350,7 +395,8 @@ class RegistrationView(View):
         self.competition = competition_form.cleaned_data['competition']
 
         if (self.competition.session != Competition.Session.UNIVERSITY_SESSION and self.institution.is_university) or \
-                (self.competition.session == Competition.Session.UNIVERSITY_SESSION and not self.institution.is_university):
+                (
+                        self.competition.session == Competition.Session.UNIVERSITY_SESSION and not self.institution.is_university):
             is_valid = False
             self.context['competition_error'] = 'Nieodpowiednie zawody dla wybranej placówki edukacyjnej'
 

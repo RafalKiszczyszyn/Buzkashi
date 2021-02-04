@@ -6,8 +6,6 @@ from django.urls import reverse
 from django.utils import timezone
 from datetime import datetime, timedelta
 
-# Create your models here.
-
 
 class Competition(models.Model):
     """
@@ -212,13 +210,11 @@ class Task(models.Model):
     Id jest generowane automatycznie.
     """
 
-    # tytuł: VARCHAR(255), NOT NULL, UNIQUE
-    title = models.CharField(max_length=255, unique=True,
-                             error_messages={"unique": "Zadanie o tym tytule już istnieje"})
     objects = models.Manager
     """Domyślny menadżer dla modelu. Menadżer umożliwia tworzenie zapytań do bazy danych."""
 
-    title = models.CharField(max_length=255, unique=True)
+    title = models.CharField(max_length=255, unique=True,
+                             error_messages={"unique": "Zadanie o tym tytule już istnieje"})
     """Unikalny tytuł zadania."""
 
     body = models.TextField(max_length=2000)
