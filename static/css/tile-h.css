@@ -50,3 +50,11 @@
     font-weight: 300;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
+.tile-content__errors ul {
+    color: red;
+    list-style: none;
+    padding: 7px 0 0 0;
+    margin: 0;
+    font-weight: lighter;
+}

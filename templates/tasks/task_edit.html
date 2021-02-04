@@ -28,7 +28,9 @@
                 {{ form.body }}
             </div>
 
-            {{form.author}}
+            <div class="tile-content__errors">
+                {{ form.title.errors }}
+            </div>
 
             <div class="tile-buttons">
                 <a href="{% url 'tasks' %}"><span id="task-edit__cancel">Anuluj</span></a>

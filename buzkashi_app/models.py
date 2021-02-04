@@ -97,7 +97,7 @@ class Competition(models.Model):
                 return _competition
 
         return None
-    
+
 
 class EduInstitution(models.Model):
     """
@@ -212,6 +212,9 @@ class Task(models.Model):
     Id jest generowane automatycznie.
     """
 
+    # tytuł: VARCHAR(255), NOT NULL, UNIQUE
+    title = models.CharField(max_length=255, unique=True,
+                             error_messages={"unique": "Zadanie o tym tytule już istnieje"})
     objects = models.Manager
     """Domyślny menadżer dla modelu. Menadżer umożliwia tworzenie zapytań do bazy danych."""
 
