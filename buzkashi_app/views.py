@@ -2,7 +2,6 @@ import csv
 from datetime import timedelta
 from io import StringIO
 
-
 from django import forms
 from django.http import HttpResponse
 from django.views.generic import CreateView, UpdateView
@@ -117,6 +116,10 @@ class RankView(View):
 
 
 class SolutionsView(View):
+    """
+    Klasa widoku dla rozwiązań oczekujących na zaakceptowanie.
+    Dostęp do widoku wymaga zalogowania.
+    """
     template_name = 'solutions/solutions.html'
 
     def __init__(self, *args, **kwargs):
@@ -124,6 +127,9 @@ class SolutionsView(View):
         self.context = {}
 
     def get(self, request):
+        """
+        Przygotowuje dla template listę oczekujących rozwiązań przypisanych do sędziego oraz obecnie trwających zawodów.
+        """
         competition = Competition.get_current_competition()
         if competition:
             self.context['competition_title'] = competition.title
@@ -131,7 +137,8 @@ class SolutionsView(View):
             return render(request, self.template_name, self.context)
 
         solutions = Solution.objects.select_related('author__competition') \
-            .filter(judge_id=request.user.id).filter(status=Solution.SolutionStatus.PENDING)
+            .filter(judge_id=request.user.id).filter(author__competition=competition) \
+            .filter(status=Solution.SolutionStatus.PENDING)
 
         self.context['solutions'] = solutions
 
@@ -139,6 +146,10 @@ class SolutionsView(View):
 
 
 class SolutionResultsView(View):
+    """
+    Klasa widoku dla wyników testów automatycznych wybranego rozwiązania.
+    Dostęp do widoku wymaga zalogowania.
+    """
     template_name = 'solutions/solution_results.html'
 
     def __init__(self, *args, **kwargs):
@@ -146,6 +157,12 @@ class SolutionResultsView(View):
         self.context = {}
 
     def get(self, request, solution_id):
+        """
+        Przygotowuje dla template listę wyników testów automatycznych dla rozwiązania o podanym id.
+        Jeżeli rozwiązanie nie istnieje, zwraca odpowiedź HTTP o statusie 404.
+
+        :param solution_id: id rozwiązania.
+        """
         try:
             solution = Solution.objects.select_related('author').get(id=solution_id)
         except Solution.DoesNotExist:
@@ -159,6 +176,12 @@ class SolutionResultsView(View):
         return render(request, self.template_name, self.context)
 
     def __unpack_results(self, results):
+        """
+        Czyta zawartość plików przechowujących oczekiwane wyjście oraz aktualne wyjście progragramu po wykonanym teście.
+        Przepakowuje zawartości plików do kontekstu widoku.
+
+        :param results: lista wyników testów automatycznych.
+        """
         unpacked = []
         for result in results:
             title = result.test.title
@@ -177,6 +200,10 @@ class SolutionResultsView(View):
 
 
 class SolutionCodeView(View):
+    """
+    Klasa widoku dla podglądu kodu źródłowego wybranego rozwiązania.
+    Dostęp do widoku wymaga zalogowania.
+    """
     template_name = 'solutions/solution_code.html'
 
     def __init__(self, *args, **kwargs):
@@ -184,6 +211,12 @@ class SolutionCodeView(View):
         self.context = {}
 
     def get(self, request, solution_id):
+        """
+        Przygotowuje dla template kod źródłowy rozwiązania o podanym id.
+        Jeżeli rozwiązanie nie istnieje, zwraca odpowiedź HTTP o statusie 404.
+
+        :param solution_id: id rozwiązania.
+        """
         try:
             solution = Solution.objects.select_related('author').get(id=solution_id)
         except Solution.DoesNotExist:
@@ -199,8 +232,20 @@ class SolutionCodeView(View):
 
 
 class SolutionJudgementView(View):
+    """
+    Klasa widoku dla oceny wybranego rozwiązania.
+    Dostęp do widoku wymaga zalogowania.
+    """
 
     def get(self, request, solution_id, decision):
+        """
+        Na podstawie parametru decision akceptuje, odrzuca lub dyskwalifikuje rozwiązanie o podanym id.
+        Jeżeli rozwiązanie nie istnieje lub wartość decision nie jest jedną z dozwolonych wartości,
+        zwraca odpowiedź HTTP o statusie 404.
+
+        :param solution_id: id rozwiązania.
+        :param decision: "accept" lub "reject" lub "disqualify".
+        """
         try:
             solution = Solution.objects.select_related('author').get(id=solution_id)
         except Solution.DoesNotExist:
@@ -212,8 +257,8 @@ class SolutionJudgementView(View):
         elif decision == 'reject':
             solution.status = Solution.SolutionStatus.REJECTED
         elif decision == 'disqualify':
-            solution.status = Solution.SolutionStatus.REJECTED
-            solution.author.is_disqualified = True
+            # disqualification procedure - not implemented
+            pass
         else:
             return HttpResponse(status=404)
 
@@ -222,35 +267,69 @@ class SolutionJudgementView(View):
 
 
 class RegistrationView(View):
+    """
+    Klasa widoku dla rejestracji.
+    """
+
     template_name = 'registration/registration.html'
     ParticipantFormSet = modelformset_factory(model=Participant, form=ParticipantForm, extra=3)
+    """
+    Klasa zbioru trzech jednakowych formularzy dla zawodników.
+    Wytworzona za pomoca fabryki django.forms.modelformset_factory.
+    """
 
     def __init__(self, *args, **kwargs):
         super(RegistrationView, self).__init__(*args, **kwargs)
+        self.institution = None
+        self.competition = None
         self.context = {}
         self.redirect_context = {}
 
     def get(self, request):
+        """
+        Przygotowuje puste formularze uczestników, nazwy drużyny, wyboru placówki edukacyjnej, wyboru zawodów i
+        pusty formularz uzupełniający dla template.
+        """
         formset = self.ParticipantFormSet()
         self.__load_forms(formset)
 
         return render(request, self.template_name, self.context)
 
     def post(self, request):
-        participant_formset = self.ParticipantFormSet(request.POST)
+        """
+        Wypełnia formularze danymi przesłanymi wraz z żadaniem POST.
+        Sprawdza poprawność formularzy oraz zgodność sesji zawodów z typem placówki edukacyjnej.
+        Poprawność formularzu uzupełniającego jest sprawdzana, gdy wybraną placówką edukacyjną nie jest uczelnia wyższa.
+        Jeżeli dane w formularzach są poprawne, zapisuje model zespołu, modele uczestników i zwraca przekierowanie
+        HTTP na stronę z podsumowaniem.
+        """
+        formset = self.ParticipantFormSet(request.POST)
         team_form = TeamForm(request.POST)
         institution_form = EduInstitutionSelectForm(request.POST)
         competition_form = CompetitionSelectForm(request.POST)
         compliment_form = RegistrationComplimentForm(request.POST)
 
-        if self.__is_valid(participant_formset, team_form, institution_form, competition_form, compliment_form):
-            self.__save_models(participant_formset, team_form, institution_form, competition_form, compliment_form)
+        if self.__is_valid(formset, team_form, institution_form, competition_form, compliment_form):
+            self.__save_models(formset.save(commit=False), team_form.save(commit=False),  compliment_form)
             return redirect(f"{reverse('registration_success')}?{urlencode(self.redirect_context)}")
 
-        self.__load_forms(participant_formset, team_form, institution_form, competition_form, compliment_form)
+        self.__load_forms(formset, team_form, institution_form, competition_form, compliment_form)
         return render(request, self.template_name, self.context)
 
     def __is_valid(self, participant_formset, team_form, institution_form, competition_form, compliment_form):
+        """
+        Sprawdza poprawność formularzy.
+        Poprawność formularzu uzupełniającego jest sprawdzana, gdy wybraną placówką edukacyjną nie jest uczelnia wyższa.
+        Sprawdza zgodność sesji zawodów z typem placówki edukacyjnej.
+
+        :param participant_formset: zbiór formularzy dla uczestników.
+        :param team_form: formularz nazwy drużyny.
+        :param institution_form: formularz wyboru placówki edukacyjnej.
+        :param competition_form: formularz wyboru zawodów.
+        :param compliment_form: formularz uzypełniający.
+
+        :return: True jeżeli wszystkie formularze są poprawne. False w przeciwnym wypadku.
+        """
         is_valid = True
 
         # czy dane zawodników są poprawne
@@ -264,61 +343,64 @@ class RegistrationView(View):
         # czy wybrano istniejącą placówkę edukacyjną
         if not institution_form.is_valid():
             is_valid = False
-        institution = institution_form.cleaned_data['institution']
+        self.institution = institution_form.cleaned_data['institution']
 
         if not competition_form.is_valid():
             is_valid = False
-        competition = competition_form.cleaned_data['competition']
+        self.competition = competition_form.cleaned_data['competition']
 
-        if (competition.session != Competition.Session.UNIVERSITY_SESSION and institution.is_university)\
-                or (competition.session == Competition.Session.UNIVERSITY_SESSION and not institution.is_university):
+        if (self.competition.session != Competition.Session.UNIVERSITY_SESSION and self.institution.is_university) or \
+                (self.competition.session == Competition.Session.UNIVERSITY_SESSION and not self.institution.is_university):
             is_valid = False
             self.context['competition_error'] = 'Nieodpowiednie zawody dla wybranej placówki edukacyjnej'
 
         # jezeli wybrano szkołę średnią sprawdź poprawność danych uzupełniających
-        if not institution.is_university:
-            compliment_form.set_valid_auth_code(institution.authorization_code)
+        if not self.institution.is_university:
+            compliment_form.set_valid_auth_code(self.institution.authorization_code)
             if not compliment_form.is_valid():
                 self.context['need_compliment'] = True
                 is_valid = False
-        print(institution.is_university)
 
         return is_valid
 
-    def __save_models(self, participant_formset, team_form, institution_form, competition_form, compliment_form):
-        team = team_form.save(commit=False)
-        institution = institution_form.cleaned_data['institution']
-        competition = competition_form.cleaned_data['competition']
+    def __save_models(self, participants, team, compliment_form):
+        """
+        Tworzy modele uczestników i drużyny. Przypisuje drużynie wybrane zawody, placówkę edukacyjną oraz zawodników.
+        Jeżeli wybrano szkołę średnią, przypisuje drużynie priorytet oraz opiekuna.
+        Zapisuje modele.
 
-        if not institution.is_university:
+        :param participants: lista modeli zawodników. Pierwszy zawodnik jest kapitanem.
+        :param team: model drużyny.
+        :param compliment_form: formularz uzupełniający.
+        """
+        if not self.institution.is_university:
             team.tutor = f"{compliment_form.cleaned_data['tutor_name']} " \
                          f"{compliment_form.cleaned_data['tutor_surname']}"
             team.priority = compliment_form.cleaned_data['priority']
 
-        team.institution = institution
-        team.competition = competition
+        team.institution = self.institution
+        team.competition = self.competition
 
-        participants = participant_formset.save(commit=False)
         participants[0].is_capitan = True
-        #with transaction.atomic():
-        #    team.save()
-        #    for participant in participants:
-        #        participant.team = team
-        #        participant.save()
+        with transaction.atomic():
+            team.save()
+            for participant in participants:
+                participant.team = team
+                participant.save()
 
         self.redirect_context['team_name'] = team.name
-        self.redirect_context['competition_title'] = competition.title
-        self.redirect_context['competition_start_date'] = competition.start_date
+        self.redirect_context['competition_title'] = self.competition.title
+        self.redirect_context['competition_start_date'] = self.competition.start_date
         self.redirect_context['captain_email'] = participants[0].email
-
-        return True
 
     def __load_forms(self, participants,
                      team=TeamForm(),
                      institution=EduInstitutionSelectForm(),
                      competition=CompetitionSelectForm(),
                      compliment=RegistrationComplimentForm()):
-
+        """
+        Przepakowuje formularze do kontekstu widoku.
+        """
         self.context['management_form'] = participants.management_form
         self.context['captain'] = participants[0]
         self.context['participant1'] = participants[1]
@@ -330,6 +412,10 @@ class RegistrationView(View):
 
 
 def registration_success_view(request):
+    """
+    Metoda widoku dla podsumowania poprawnej rejestracji.
+    Dane podsumowania pobierane są z query string.
+    """
     context = {}
     for key in request.GET:
         print(type(request.GET[key]), request.GET[key])

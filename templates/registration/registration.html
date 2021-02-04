@@ -177,7 +177,7 @@
                         {{ field }}
                         {% if need_compliment and field.errors %}
                             {% for error in field.errors %}
-                                <h6 class="id_error-compliment-{{field.name}}">{{ error }}</h6>
+                                <h6 id="id_error-compliment-{{field.name}}" class="form-grid-error">{{ error }}</h6>
                             {% endfor %}
                         {% endif %}
                     {% endfor %}

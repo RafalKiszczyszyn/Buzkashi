@@ -240,7 +240,6 @@ class JudgeViewTest(StaticLiveServerTestCase):
 
 @contextmanager
 def suppress_stderr():
-    "Temporarly suppress writes to stderr"
 
     class Null:
         write = lambda *args: None
@@ -253,6 +252,12 @@ def suppress_stderr():
 
 
 def exception_to_none(func, *args, **kwargs):
+    """
+    Wykonuje podaną funkcje i jeżeli zostanie złapany wyjątek NoSuchElementException zwraca None.
+
+    :param func: funkcja do wykonania.
+    :return: wynik funkcji func lub None w przypadku złapania wyjątku.
+    """
     try:
         return func(*args, **kwargs)
     except exceptions.NoSuchElementException:
@@ -260,6 +265,9 @@ def exception_to_none(func, *args, **kwargs):
 
 
 class RegistrationViewTest(StaticLiveServerTestCase):
+    """
+    Zestaw testów UI dla PU Rejestracja.
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -268,6 +276,10 @@ class RegistrationViewTest(StaticLiveServerTestCase):
         cls.success_url = urljoin(cls.live_server_url, '/registration/success')
 
     def setUp(self):
+        """
+        Tworzy w tymczasowej bazie model szkoły średniej, uczelni wyższej, zawody dla szkół średnich oraz zawody dla
+        studentów.
+        """
         institution1 = EduInstitution.objects.create(name='Szkoła średnia', region='Region', email='hs@example.com',
                                                      authorization_code='valid@code', is_university=False)
         self.high_school_id = str(institution1.id)
@@ -293,10 +305,17 @@ class RegistrationViewTest(StaticLiveServerTestCase):
             self.browser.implicitly_wait(3)
 
     def tearDown(self) -> None:
+        """
+        Zamyka przeglądarkę oraz usuwa wszystkie modele z tymczasowej bazy danych.
+        """
         with suppress_stderr():
             self.browser.quit()
 
     def init(self):
+        """
+        Tworzy słownik input_id -> input_value i wypełnia go przykładowymi danymi.
+        Ustawia adres w przęglądarce na adres rejestracji.
+        """
         self.inputs = {
             # participant1
             'id_form-0-name': 'Rafał',
@@ -322,21 +341,40 @@ class RegistrationViewTest(StaticLiveServerTestCase):
         self.browser.get(self.registration_url)
 
     def populate_inputs(self, **inputs):
+        """
+        Wypyłenia formularz za pomocą parametrów typu klucz=wartość.
+        """
         for id in inputs:
             self.browser.find_element_by_id(id).send_keys(inputs[id])
 
     def select_institution(self, id_value):
+        """
+        Wybiera z pola select placówkę edukacyjną o podanym id.
+
+        :param id_value: Id placówki edukacyjnej.
+        """
         select = Select(self.browser.find_element_by_id('id_institution'))
         select.select_by_value(id_value)
 
     def select_competition(self, id_value):
+        """
+        Wybiera z pola select zawody o podanym id.
+
+        :param id_value: Id zawodów.
+        """
         select = Select(self.browser.find_element_by_id('id_competition'))
         select.select_by_value(id_value)
 
     def submit(self):
+        """
+        Wysyła formularz.
+        """
         self.browser.find_element_by_id('id_submit').click()
 
     def test_PT008(self):
+        """
+        PT008 - szczegóły w dokumentacji etapu 4.
+        """
         self.browser.get(self.live_server_url)
         self.browser.find_element_by_id('topbar-button-register').click()
         self.submit()
@@ -344,6 +382,9 @@ class RegistrationViewTest(StaticLiveServerTestCase):
         self.assertEqual(self.browser.current_url, self.registration_url)
 
     def test_PT009(self):
+        """
+        PT009 - szczegóły w dokumentacji etapu 4.
+        """
         self.init()
         self.inputs['id_form-0-email'] = 'invalid@email'
         self.inputs['id_form-1-email'] = 'invalid@email'
@@ -360,6 +401,9 @@ class RegistrationViewTest(StaticLiveServerTestCase):
         self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id, 'id_error-name'))
 
     def test_PT010(self):
+        """
+        PT010 - szczegóły w dokumentacji etapu 4.
+        """
         self.init()
         self.inputs['id_name'] = 'Unikalni'
         self.populate_inputs(**self.inputs)
@@ -376,6 +420,9 @@ class RegistrationViewTest(StaticLiveServerTestCase):
         self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id, 'id_error-competition'))
 
     def test_PT011(self):
+        """
+        PT011 - szczegóły w dokumentacji etapu 4.
+        """
         self.init()
         self.inputs['id_name'] = 'Czarni rycerze'
         self.populate_inputs(**self.inputs)
@@ -386,18 +433,23 @@ class RegistrationViewTest(StaticLiveServerTestCase):
         self.assertEqual(self.browser.current_url.split("?")[0], self.success_url)
 
     def test_PT012(self):
+        """
+        PT012 - szczegóły w dokumentacji etapu 4.
+        """
         pass
 
     def test_PT013(self):
+        """
+        PT013 - szczegóły w dokumentacji etapu 4.
+        """
         self.init()
         self.inputs['id_name'] = 'Szefostwo'
         self.inputs['id_authorization_code'] = 'valid@code'
         self.inputs['id_tutor_name'] = 'Adela'
         self.inputs['id_tutor_surname'] = 'Majewska'
-        self.inputs['id_priority'] = '1'
         self.populate_inputs(**self.inputs)
         self.select_institution(self.high_school_id)
         self.select_competition(self.high_school_comp_id)
         self.submit()
 
-        self.assertURLEqual(self.browser.current_url, self.success_url)
+        self.assertEqual(self.browser.current_url.split("?")[0], self.success_url)
