@@ -436,7 +436,26 @@ class RegistrationViewTest(StaticLiveServerTestCase):
         """
         PT012 - szczegóły w dokumentacji etapu 4.
         """
-        pass
+        self.init()
+        self.inputs['id_name'] = 'Lolersi'
+        self.populate_inputs(**self.inputs)
+        self.select_institution(self.high_school_id)
+        self.select_competition(self.high_school_comp_id)
+        self.submit()
+
+        self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id, 'id_error-compliment-authorization_code'))
+        self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id, 'id_error-compliment-tutor_name'))
+        self.assertIsNotNone(exception_to_none(self.browser.find_element_by_id, 'id_error-compliment-tutor_surname'))
+
+        self.populate_inputs(
+            id_authorization_code='invalid@code',
+            id_tutor_name='Adela',
+            id_tutor_surname='Majewska'
+        )
+        self.submit()
+
+        self.assertIsNotNone(
+            exception_to_none(self.browser.find_element_by_id, 'id_error-compliment-authorization_code'))
 
     def test_PT013(self):
         """

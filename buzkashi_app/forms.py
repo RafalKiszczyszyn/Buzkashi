@@ -4,12 +4,12 @@ from . import models
 
 class ParticipantForm(forms.ModelForm):
     """
-    Klasa formularzu dla uczestnika
+    Klasa formularzu dla uczestnika.
     """
 
     class Meta:
         """
-        Klasa wskazująca, które pola z modelu zawodnika mają być połączone z formularzem
+        Klasa z metadanymi wskazująca, które pola z modelu zawodnika mają być połączone z formularzem.
         """
 
         model = models.Participant
@@ -28,12 +28,12 @@ class ParticipantForm(forms.ModelForm):
 
 class TeamForm(forms.ModelForm):
     """
-    Klasa formularzu dla zespołu
+    Klasa formularzu dla zespołu.
     """
 
     class Meta:
         """
-        Klasa wskazująca, które pola z modelu zespolu mają być powiązane z formularzem
+        Klasa z metadanymi wskazująca, które pola z modelu zespolu mają być powiązane z formularzem
         """
 
         model = models.Team
@@ -50,16 +50,16 @@ class TeamForm(forms.ModelForm):
 
 class EduInstitutionSelectForm(forms.Form):
     """
-    Klasa formularzu wyboru placówki edukacyjnej
+    Klasa formularzu wyboru placówki edukacyjnej.
     """
 
     class EduInstitutionChoiceField(forms.ModelChoiceField):
         def label_from_instance(self, obj):
             """
-            Nadpisuje sposób w jaki reprezentowany jest obiekt użytkownikowi
+            Definiuje reprezentacje obiektu dla użytkownika.
 
-            @param obj: instancja modelu placówki edukacyjnej
-            @return: 'nazwa, rejon'
+            :param obj: instancja modelu placówki edukacyjnej
+            :return: 'nazwa, rejon'
             """
             return f"{obj.name}, {obj.region}"
 
@@ -68,20 +68,31 @@ class EduInstitutionSelectForm(forms.Form):
 
 
 class CompetitionSelectForm(forms.Form):
-
+    """
+    Klasa formularzu wyboru zawodów.
+    """
     class CompetitionChoiceField(forms.ModelChoiceField):
         def label_from_instance(self, obj):
+            """
+            Definiuje reprezentacje obiektu dla użytkownika.
+
+            :param obj: instancja modelu zawodów
+            :return: 'tytuł, sesja, data rozpoczęcia'
+            """
             return f'{obj.title}, ' \
                    f'{"uczelnie wyższe" if obj.session == models.Competition.Session.UNIVERSITY_SESSION else "szkoły średnie"}, ' \
                    f'{obj.start_date}'
 
     competition = CompetitionChoiceField(label='Zawody',
                                          queryset=models.Competition.get_coming_competitions(registration_open=True))
+    """
+    Zawody wybierane są tylko z nadchodzących, otwartych na rejestrację.
+    """
 
 
 class RegistrationComplimentForm(forms.Form):
     """
-    Klasa formularzu danych uzupełniających rejestracje dla szkół średnich
+    Klasa formularzu danych uzupełniających rejestrację dla szkół średnich.
     """
 
     # kod autoryzacyjny
@@ -103,10 +114,20 @@ class RegistrationComplimentForm(forms.Form):
         self.valid_auth_code = None
 
     def set_valid_auth_code(self, valid_auth_code):
+        """
+        Ustawienie kodu autoryzacyjnego powoduje, że pola formularzu są wymagane.
+
+        :param valid_auth_code: poprawny kod autoryzacyjny.
+        """
         self.valid_auth_code = valid_auth_code
         self.required = True
 
     def clean(self):
+        """
+        Jeżeli formularz jest wymagany, sprawdza
+        czy pola są wypełnione,
+        czy kod autoryzacyjny jest poprawny.
+        """
         cleaned_data = super().clean()
 
         if self.required:

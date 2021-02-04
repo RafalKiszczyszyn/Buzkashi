@@ -84,8 +84,20 @@ class TasksViewJudgeTest(TestCase):
 
 
 class CompetitionModelTest(TestCase):
+    """
+    Zestaw testów dla metod statycznych modelu zawodów.
+    """
 
     def test_get_current_competition(self):
+        """
+        Test dla metody Competition.get_current_competition. Metoda jest testowana dla przypadków:
+
+        + brak zawodów,
+        + zawody startujące za minutę,
+        + zawody zakończone minutę temu,
+        + zawody, które właśnie wystartowały.
+
+        """
         competition_model = Competition.get_current_competition()
         self.assertIsNone(competition_model)
 
@@ -103,6 +115,16 @@ class CompetitionModelTest(TestCase):
         self.assertEqual(competition_model.id, _id)
 
     def test_get_coming_competitions(self):
+        """
+        Test dla metody Competition.get_coming_competition. Metoda jest testowana dla przypadków:
+
+        + brak zawodów,
+        + zawody, które właśnie wystartowały,
+        + zawody startujące za tydzień,
+        + zawody startujące za tydzień i jeden dzień.
+
+        """
+
         competition_set = Competition.get_coming_competitions()
         self.assertEqual(len(competition_set), 0)
 
@@ -125,8 +147,18 @@ class CompetitionModelTest(TestCase):
 
 
 class RegistrationComplimentFormTest(TestCase):
+    """
+    Zestaw testów dla metody is_valid z klasy RegistrationComplimentForm.
+    """
 
     def test_not_required(self):
+        """
+        Testowanie metody is_valid, gdy formularz nie jest wymagany. Metoda jest testowana dla przypadków:
+
+        + pusty formularz,
+        + pusty formularz z niedozwolonym priorytetem.
+
+        """
         form = RegistrationComplimentForm({})
         self.assertTrue(form.is_valid())
 
@@ -134,6 +166,12 @@ class RegistrationComplimentFormTest(TestCase):
         self.assertFalse(form.is_valid())
 
     def test_required_empty_form(self):
+        """
+        Testowanie metody is_valid, gdy formularz jest wymagany. Metoda jest testowana dla przypadków:
+
+        + pusty formularz.
+
+        """
         form = RegistrationComplimentForm({})
         form.set_valid_auth_code('valid@code')
         self.assertFalse(form.is_valid())
@@ -144,6 +182,12 @@ class RegistrationComplimentFormTest(TestCase):
         self.assertTrue(form.has_error('priority'))
 
     def test_required_invalid_auth_code(self):
+        """
+        Testowanie metody is_valid, gdy formularz jest wymagany. Metoda jest testowana dla przypadków:
+
+        + formularz z niepoprawnym kodem autoryzacyjnym.
+
+        """
         form = RegistrationComplimentForm({
             'authorization_code': 'invalid@code',
             'tutor_name': 'Rafał',
@@ -156,6 +200,12 @@ class RegistrationComplimentFormTest(TestCase):
         self.assertTrue(form.has_error('authorization_code'))
 
     def test_required_valid_auth_code(self):
+        """
+        Testowanie metody is_valid, gdy formularz jest wymagany. Metoda jest testowana dla przypadków:
+
+        + formularz wypełniony poprawnymi danymi.
+
+        """
         form = RegistrationComplimentForm({
             'authorization_code': 'valid@code',
             'tutor_name': 'Rafał',
