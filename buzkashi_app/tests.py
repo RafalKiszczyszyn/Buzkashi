@@ -13,6 +13,13 @@ PASSWORD = 'zawody2k21'
 
 
 def create_user(username=USERNAME, password=PASSWORD):
+    """
+    Funkcja pomocnicza tworząca nowego użytkownika.
+
+    :param username: Nazwa użytkownika.
+    :param password: Hasło użytkownika.
+    :return: Obiekt użytkownika.
+    """
     user = User.objects.create(username=username)
     user.set_password(password)
     user.save()
@@ -20,18 +27,43 @@ def create_user(username=USERNAME, password=PASSWORD):
 
 
 def create_judge():
+    """
+    Funkcja pomocnicza tworząca nowego sędziego.
+
+    :return: Obiekt sędziego.
+    """
     return Judge.objects.create(user=create_user())
 
 
-def create_task(judge):
-    return Task.objects.create(title='Nowe zadanie', body='Treść', author=judge)
+def create_task(judge, title, body):
+    """
+    Funkcja pomocnicza tworząca nowe zadanie.
+
+    :param judge: Obiekt sędziego.
+    :param title: Tytuł zadania.
+    :param body: Treść zadania.
+    :return: Obiekt zadania.
+    """
+    return Task.objects.create(title=title, body=body, author=judge)
 
 
 def create_competition(title, start_date):
+    """
+    Funkcja pomocnicza tworząca nowe zawody.
+
+    :param title: Nazwa zawodów.
+    :param start_date: Data rozpoczęcia zawodów.
+    :return: Obiekt zawodów.
+    """
     return Competition.objects.create(title=title, start_date=start_date, is_test=False).id
 
 
 def get_task_by_other_judge():
+    """
+    Funkcja pomocnicza tworząca nowego sędziego i jego zadanie.
+
+    :return: Obiekt zadania stworzonego przez nowego sędziego.
+    """
     user = create_user('nowy', PASSWORD)
     other_judge = Judge.objects.create(user=user)
     task = Task.objects.create(title='Inne zadanie', body='Treść', author=other_judge)
@@ -87,7 +119,7 @@ class TasksViewJudgeTest(TestCase):
         """
         Test statusu odpowiedzi dla żądania widoku edycji zadania o danym id.
         """
-        task = create_task(self.judge)
+        task = create_task(self.judge, 'Nowe zadanie', 'Treść')
         response = self.client.get(reverse('task_edit', args=[task.id]))
         self.assertEqual(response.status_code, 200)
 
