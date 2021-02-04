@@ -84,12 +84,12 @@ class TaskEditView(UpdateView):
     def get_object(self, **kwargs):
         """
         Zwraca pojedynczy obiekt, którego dane zostaną wyświetlone.
+        Jeżeli zadanie nie istnieje lub autorem nie jest zalogowany użytkownik, zwraca odpowiedź HTTP o statusie 404.
 
         :param kwargs: argumenty nazwane przekazane w URL, zmienna task_id określa id zadania.
         :return: obiekt zadania o id przekazanym w URL.
         """
-        id_ = self.kwargs.get("task_id")
-        return get_object_or_404(Task, id=id_)
+        return get_object_or_404(Task, id=self.kwargs.get("task_id"), author=self.request.user.id)
 
 
 class TaskCreateView(CreateView):
@@ -130,7 +130,7 @@ class RankView(View):
 
     def get(self, request):
         """
-        Przygotowuje dla template czas zakończenia zawodów i tablicę rankingu dla aktualnie trwających zawodów.
+        Przygotowuje dla template czas zakończenia zawodów i tablice rankingu dla aktualnie trwających zawodów.
         Jeżeli aktualnie nie odbywają się zawody, przekazuje pustą tablicę danych.
         Dane rankingów odczytuje z plików csv przypisanych zawodom.
         Jeżeli użytkownik wyświetlający ranking jest sędzią, przekazuje dane rankingu aktualnego i zamrożonego.

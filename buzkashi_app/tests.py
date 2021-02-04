@@ -39,6 +39,9 @@ def get_task_by_other_judge():
 
 
 class TaskViewTest(TestCase):
+    """
+    Test dla widoku zadań dla użytkownika, który nie jest sędzią.
+    """
 
     def setUp(self) -> None:
         create_user()
@@ -47,11 +50,17 @@ class TaskViewTest(TestCase):
         self.client.login(username=USERNAME, password=PASSWORD)
 
     def test_tasks_view_by_not_judge(self):
+        """
+        Test statusu odpowiedzi dla żądania strony z zadaniami.
+        """
         response = self.client.get(reverse('tasks'))
-        self.assertNotEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 404)
 
 
 class TasksViewJudgeTest(TestCase):
+    """
+    Test dla widoku zadań dla użytkownika, który jest sędzią.
+    """
 
     def setUp(self) -> None:
         self.judge = create_judge()
@@ -60,24 +69,39 @@ class TasksViewJudgeTest(TestCase):
         self.client.login(username=USERNAME, password=PASSWORD)
 
     def test_tasks_url_resolves_to_tasks_view(self):
+        """
+        Test zwrócenia odpowiedniego widoku dla żądania widoku zadań.
+        """
         resolver = resolve('/tasks/')
         self.assertEqual(resolver.func.__name__, TasksView.as_view().__name__)
 
     def test_tasks_view_by_judge(self):
+        """
+        Test statusu odpowiedzi i template'u dla żądania widoku zadań.
+        """
         response = self.client.get(reverse('tasks'))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'tasks/tasks.html')
 
     def test_edit_task(self):
+        """
+        Test statusu odpowiedzi dla żądania widoku edycji zadania o danym id.
+        """
         task = create_task(self.judge)
         response = self.client.get(reverse('task_edit', args=[task.id]))
         self.assertEqual(response.status_code, 200)
 
     def test_edit_non_existent_task(self):
+        """
+        Test statusu odpowiedzi dla żądania widoku edycji nieistniejącego zadania.
+        """
         response = self.client.get(reverse('task_edit', args=[0]))
         self.assertEqual(response.status_code, 404)
 
     def test_create_task(self):
+        """
+        Test dodania nowego zadania.
+        """
         self.client.post(reverse('task_create'), {'title': "Nowe zadanie", 'body': "Treść", 'author': self.judge})
         self.assertEqual(Task.objects.last().title, "Nowe zadanie")
         self.assertEqual(Task.objects.last().body, "Treść")
