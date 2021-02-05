@@ -12,19 +12,19 @@ class GuestUser(HttpUser):
 
     @task
     def home_page(self):
-        self.client.get(url='/')
+        self.client.get(url='')
 
     @task
     def registration_page(self):
-        self.client.get(url='/registration/')
+        self.client.get(url='/registration')
 
     @task
     def registration_success_page(self):
-        self.client.get(url='/registration/success/')
+        self.client.get(url='/registration/success')
 
     @task
     def rank_page(self):
-        self.client.get(url='/rank/')
+        self.client.get(url='/rank')
 
 
 class JudgeUser(HttpUser):
@@ -45,20 +45,28 @@ class JudgeUser(HttpUser):
                          headers={'X-CSRFToken': csrftoken})
 
     @task
+    def rank_page(self):
+        self.client.get(url='/rank')
+
+    @task
     def tasks_page(self):
-        self.client.get(url='/tasks/')
+        self.client.get(url='/tasks')
 
     @task
     def task_create_page(self):
-        self.client.get(url='/tasks/create/')
+        self.client.get(url='/tasks/create')
 
-    @task(0.01)
-    def task_create_page(self):
-        response = self.client.get("/tasks/create/")
-        csrftoken = response.cookies['csrftoken']
-        self.client.post(url='/tasks/create/',
-                         json={'title': ''.join(random.choices(string.ascii_letters, k=5)), 'body': 'Treść'},
-                         headers={'X-CSRFToken': csrftoken})
+    # @task
+    # def task_create_page(self):
+    #     response = self.client.get("/tasks/create/")
+    #     csrftoken = response.cookies['csrftoken']
+    #     self.client.post(url='/tasks/create/',
+    #                      json={'title': ''.join(random.choices(string.ascii_letters, k=5)), 'body': 'Treść'},
+    #                      headers={'X-CSRFToken': csrftoken})
+
+    @task
+    def task_edit_page(self):
+        self.client.get(url='/tasks/1')
 
     @task
     def solutions_page(self):
