@@ -24,7 +24,7 @@ class GuestUser(HttpUser):
 
     @task
     def rank_page(self):
-        self.client.get(url='/rank')
+        self.client.get(url='/rank/')
 
 
 class JudgeUser(HttpUser):
@@ -46,15 +46,15 @@ class JudgeUser(HttpUser):
 
     @task
     def rank_page(self):
-        self.client.get(url='/rank')
+        self.client.get(url='/rank/')
 
     @task
     def tasks_page(self):
-        self.client.get(url='/tasks')
+        self.client.get(url='/tasks/')
 
     @task
     def task_create_page(self):
-        self.client.get(url='/tasks/create')
+        self.client.get(url='/tasks/create/')
 
     # @task
     # def task_create_page(self):
