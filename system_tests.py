@@ -21,16 +21,28 @@ from buzkashi_app.models import EduInstitution, Judge, Task, Competition, Team
 
 
 class JudgeViewTest(StaticLiveServerTestCase):
+    """
+    Zestaw testów systemowych dla PU Dodanie zadania.
+    """
 
     def setUp(self):
+        """
+        Otwiera przeglądarkę i przechodzi na stronę /tasks/ z zadaniami danego użytkownika.
+        """
         self.browser = webdriver.Chrome('./static/chromedriver')
         self.browser.implicitly_wait(3)
         self.tasks_url = urljoin(self.live_server_url, '/tasks/')
 
     def tearDown(self) -> None:
+        """
+        Zamyka przeglądarkę oraz usuwa tymczasową bazę danych.
+        """
         self.browser.close()
 
     def force_login_judge(self):
+        """
+        Tworzy nowego sędziego w bazie danych i wymusza zalogowanie go do systemu.
+        """
         user = get_user_model().objects.create(username='nowy_user', password='zawody2k21')
         Judge.objects.create(user=user)
 
@@ -38,12 +50,30 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.browser.get(self.live_server_url)
 
     def check_tasks_page(self):
+        """
+        Sprawdza zawartość strony /tasks/.
+        Sprawdza czy na stronie znajdują się:
+
+        + tytuł strony 'Zadania',
+        + przycisk dodania nowego zadania 'Dodaj nowe zadanie'.
+        """
         page_title_element = self.browser.find_element_by_id("tasks__title")
         task_create_button_element = self.browser.find_element_by_id("create-button")
         self.assertEqual("Zadania", page_title_element.text)
         self.assertIn('Dodaj nowe zadanie', task_create_button_element.get_attribute("value"))
 
     def check_task_tile(self, task_title):
+        """
+        Sprawdza zawartość strony /tasks/, ogranicza się do sprawdzenia kafelka jednego zadania.
+        Sprawdza czy kafelek zadania zawiera:
+
+        + tytuł zadania,
+        + przycisk 'Edytuj zadanie',
+        + przycisk 'Dodaj testy akceptacyjne',
+        + przycisk 'Dodaj do zawodów'.
+
+        :param task_title: Tytuł zadania
+        """
         task = Task.objects.get(title=task_title)
         new_task_element = self.browser.find_element_by_id("tasks__tile-{}".format(task.id))
         self.assertIn(task_title, new_task_element.get_attribute("innerHTML"))
@@ -52,6 +82,12 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertIn("Dodaj do zawodów", new_task_element.get_attribute("innerHTML"))
 
     def task_edit_send_keys(self, task_title, task_body):
+        """
+        Wypełnia formularz nowego zadania i przesyłająca formularz.
+
+        :param task_title: Tytuł zadania
+        :param task_body: Treść zadania
+        """
         title_input_element = self.browser.find_element_by_id("id_title")
         body_input_element = self.browser.find_element_by_id("id_body")
         save_button_element = self.browser.find_element_by_id("task-edit__submit")
@@ -65,6 +101,19 @@ class JudgeViewTest(StaticLiveServerTestCase):
         save_button_element.click()
 
     def check_task_edit_page(self, task_title, task_body, placeholder):
+        """
+        Sprawdza zawartość strony edycji zadania.
+        Sprawdza czy strona zawiera:
+
+        + tytuł strony 'Edycja zadania',
+        + dane zadania / domyślne placeholdery,
+        + przycisk 'Anuluj',
+        + przycisk 'Zapisz zmiany'.
+
+        :param task_title: Tytuł zadania
+        :param task_body: Treść zadania
+        :param placeholder: Boolean określający czy strona powinna wyświetlać placeholdery
+        """
         if placeholder:
             input_attribute = "placeholder"
         else:
@@ -82,6 +131,17 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertEqual("Zapisz zmiany", save_button_element.get_attribute("value"))
 
     def check_task_competition(self, task_title, comp_title, comp_session):
+        """
+        Sprawdza czy kafelek zadania na stronie z listą zadań wyświetla zawody przypisane do zadania.
+        Sprawdza czy kafelek zawiera:
+
+        + nazwę zawodów,
+        + sesję zawodów.
+
+        :param task_title: Tytuł zadania
+        :param comp_title: Nazwa zawodów
+        :param comp_session: Sesja zawodów
+        """
         task = Task.objects.get(title=task_title)
         task_comp_title = self.browser.find_element_by_id("tasks__tile__competition-title-{}".format(task.id))
         task_comp_session = self.browser.find_element_by_id("tasks__tile__session-{}".format(task.id))
@@ -89,12 +149,32 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertIn(comp_session, task_comp_session.get_attribute("innerHTML"))
 
     def check_task_edit_competition(self, comp_title, comp_session):
+        """
+        Sprawdza czy strona edycji zadania wyświetla zawody przypisane do zadania.
+        Sprawdza czy kafelek zawiera:
+
+        + nazwę zawodów,
+        + sesję zawodów.
+
+        :param comp_title: Nazwa zawodów
+        :param comp_session: Sesja zawodów
+        """
         task_comp_title_element = self.browser.find_element_by_id("task-edit__comp-title")
         task_comp_session_element = self.browser.find_element_by_id("task-edit__comp-session")
         self.assertEqual(comp_title, task_comp_title_element.text)
         self.assertIn(comp_session, task_comp_session_element.get_attribute("innerHTML"))
 
     def check_modal(self, task_title):
+        """
+        Sprawdza czy modal służący do przypisania zawodów do zadania zawiera:
+
+        + tytuł zadania,
+        + tekst pomocniczy 'Wybierz zawody, do których chcesz podpiąć zadanie',
+        + opcję usunięcia przypisania do zawodów,
+        + przycisk 'Zapisz'.
+
+        :param task_title: Tytuł zadania
+        """
         modal_title_element = self.browser.find_element_by_id("modal__task-title")
         modal_content_element = self.browser.find_element_by_id("modal_tile-content")
         modal_select_input_element = self.browser.find_element_by_name("select-comp")
@@ -108,6 +188,11 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertEqual("Zapisz", modal_submit_button_element.get_attribute("value"))
 
     def modal_send_keys(self, comp_title):
+        """
+        Dołącza zadanie do zawodów.
+
+        :param comp_title: Nazwa zawodów
+        """
         modal_select_input_element = self.browser.find_element_by_name("select-comp")
         modal_options_list = modal_select_input_element.find_elements_by_tag_name('option')
         modal_submit_button_element = self.browser.find_element_by_id("modal__tile-buttons__submit")
@@ -120,6 +205,9 @@ class JudgeViewTest(StaticLiveServerTestCase):
         modal_submit_button_element.click()
 
     def test_PT001(self):
+        """
+        PT001 - szczegóły w dokumentacji etapu 4.
+        """
         self.browser.get(self.live_server_url)
         nav_menu = self.browser.find_element_by_id("sidebar-menu").get_attribute("innerHTML")
 
@@ -136,6 +224,9 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertIn('<input type="password" name="password"', login_inputs_element.get_attribute("innerHTML"))
 
     def test_PT002(self):
+        """
+        PT002 - szczegóły w dokumentacji etapu 4.
+        """
         self.force_login_judge()
         self.browser.get(self.tasks_url)
 
@@ -144,6 +235,9 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertNotIn('<div id="tasks__tile', main_element.get_attribute("innerHTML"))
 
     def test_PT003(self):
+        """
+        PT003 - szczegóły w dokumentacji etapu 4.
+        """
         self.test_PT002()
         title = "camelCase"
         body = "Stwórz funkcję, która rozdzieli ciąg znaków pisanych notacją camelCase."
@@ -158,6 +252,9 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.check_task_tile(title)
 
     def test_PT004(self):
+        """
+        PT004 - szczegóły w dokumentacji etapu 4.
+        """
         self.test_PT002()
         title = ""
         body = ""
@@ -172,6 +269,9 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.assertEqual(add_task_url, self.browser.current_url)
 
     def test_PT005(self):
+        """
+        PT005 - szczegóły w dokumentacji etapu 4.
+        """
         self.test_PT003()
         task_title = "camelCase"
         task_new_comp_title = "Wiosenne starcie wrocławskich uczelni"
@@ -194,6 +294,9 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.check_task_competition(task_title, task_new_comp_title, "Sesja dla studentów")
 
     def test_PT006(self):
+        """
+        PT006 - szczegóły w dokumentacji etapu 4.
+        """
         self.test_PT005()
         task_title = "camelCase"
         task_comp_title = "Wiosenne starcie wrocławskich uczelni"
@@ -214,6 +317,9 @@ class JudgeViewTest(StaticLiveServerTestCase):
         self.check_task_competition(task_title, "", "")
 
     def test_PT007(self):
+        """
+        PT007 - szczegóły w dokumentacji etapu 4.
+        """
         self.test_PT005()
         task_title = "camelCase"
         task_old_body = "Stwórz funkcję, która rozdzieli ciąg znaków pisanych notacją camelCase."
