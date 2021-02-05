@@ -30,7 +30,6 @@ class Competition(models.Model):
     session = models.IntegerField(choices=Session.choices, default=Session.UNIVERSITY_SESSION)
     """Sesja zawodów wybierana z enumeratora: Competition.Session."""
 
-    # data rozpoczęcia: TIMESTAMP, NOT NULL, DEFAULT=NOW
     start_date = models.DateTimeField(default=timezone.now)
     """Data rozpoczęcia zawodów. Domyślna wartość: timezone.now."""
 
@@ -49,11 +48,9 @@ class Competition(models.Model):
     rank = models.FileField(upload_to='uploads/ranks', blank=True, null=True)
     """Ścieżka do pliku rankingu. Opcjonalne."""
 
-    # ranking zamrożony: FILE SAVED IN DIRECTORY NOT DATABASE!
     rank_frozen = models.FileField(upload_to='uploads/ranks', blank=True, null=True)
     """Ścieżka do pliku zamrożonego rankingu. Opcjonalne."""
 
-    # czy zamrożony: BIT, NOT NULL
     is_frozen = models.BooleanField(default=False)
     """Oznaczenie zamrożenia rankingu dla danych zawodów. Domyślna wartość: False"""
 
