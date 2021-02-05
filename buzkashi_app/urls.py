@@ -18,6 +18,5 @@ urlpatterns = [
     path('solutions/judgment/<int:solution_id>,<str:decision>', login_required(SolutionJudgementView.as_view()),
          name='solution_judgement'),
     path('registration', RegistrationView.as_view(), name='registration'),
-    path('registration/success', registration_success_view, name='registration_success')
-
+    path('registration/success', registration_success_view, name='registration_success'),
 ]

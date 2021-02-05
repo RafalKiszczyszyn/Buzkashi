@@ -145,17 +145,17 @@ class RankView(View):
             self.context['end_date'] = int(end_date.timestamp() * 1000)
 
             self.context['competition'] = competition
-            rank = competition.rank.read().decode('utf-8')
-            rank_frozen = competition.rank_frozen.read().decode('utf-8')
+            rank = csv.reader(StringIO(competition.rank.read().decode('utf-8')), delimiter=',')
+            rank_frozen = csv.reader(StringIO(competition.rank_frozen.read().decode('utf-8')), delimiter=',')
 
             if request.user.is_authenticated:
-                self.context['rank'] = csv.reader(StringIO(rank), delimiter=',')
-                self.context['rank_frozen'] = csv.reader(StringIO(rank_frozen), delimiter=',')
+                self.context['rank'] = rank
+                self.context['rank_frozen'] = rank_frozen
             else:
                 if competition.is_frozen:
-                    self.context['rank_frozen'] = csv.reader(StringIO(rank_frozen), delimiter=',')
+                    self.context['rank_frozen'] = rank_frozen
                 else:
-                    self.context['rank'] = csv.reader(StringIO(rank), delimiter=',')
+                    self.context['rank'] = rank
 
         return render(request, self.template_name, self.context)
 
