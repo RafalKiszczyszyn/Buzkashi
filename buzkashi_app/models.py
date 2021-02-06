@@ -344,7 +344,7 @@ class AutomatedTestResult(models.Model):
     output = models.FileField(upload_to='uploads/test_results')
     """Ścieżka do pliku z wyjściem programu."""
 
-    status = models.TextField(choices=TestStatus.choices, default=TestStatus.FAILED)
+    status = models.IntegerField(choices=TestStatus.choices, default=TestStatus.FAILED)
     """Status testu wybierany z enumeratora: AutomatedTestResult.TestStatus. Domyślna wartość: FAILED."""
 
     runtime = models.DurationField()
