@@ -43,7 +43,7 @@ main {
     top: 25px;
 }
 
-.topbar-profile img{
+.profile-picture {
     position: absolute;
     width: 60px;
     height: 60px;
