@@ -48,5 +48,6 @@ lib/
 db.sqlite3
 pyvenv.cfg
 include/
+staticfiles/
 
 static/chromedriver
