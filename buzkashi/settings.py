@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'l=*5ub1hse#xe2slwfu49n$du%9ds=m_u-$ny40gvm&4s_c_hf'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['buzkashi.herokuapp.com']
 
