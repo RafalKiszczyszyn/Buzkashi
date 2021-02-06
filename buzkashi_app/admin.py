@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+<<<<<<< HEAD
 # Register your models here.
 from buzkashi_app.models import Judge, Task, Team, Competition, Participant, EduInstitution, Solution, AutomatedTest, \
     AutomatedTestResult
