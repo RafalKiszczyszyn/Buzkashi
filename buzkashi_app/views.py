@@ -231,13 +231,19 @@ class SolutionResultsView(View):
         for result in results:
             title = result.test.title
 
-            result.test.expected_output.open('r')
-            expected_output = result.test.expected_output.read()
-            result.test.expected_output.close()
+            try:
+                result.test.expected_output.open('r')
+                expected_output = result.test.expected_output.read()
+                result.test.expected_output.close()
+            except FileNotFoundError:
+                expected_output = 'Brak pliku!'
 
-            result.output.open('r')
-            output = result.output.read()
-            result.output.close()
+            try:
+                result.output.open('r')
+                output = result.output.read()
+                result.output.close()
+            except FileNotFoundError:
+                output = 'Brak pliku!'
 
             unpacked.append((title, expected_output, output))
 
@@ -267,9 +273,12 @@ class SolutionCodeView(View):
         except Solution.DoesNotExist:
             return HttpResponse(status=404)
 
-        solution.source_code.open('r')
-        self.context['source_code'] = solution.source_code.read()
-        solution.source_code.close()
+        try:
+            solution.source_code.open('r')
+            self.context['source_code'] = solution.source_code.read()
+            solution.source_code.close()
+        except FileNotFoundError:
+            self.context['source_code'] = 'Brak pliku!'
 
         self.context['solution'] = solution
 
